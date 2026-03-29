@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-space-black: #050505;
+  --color-glass-card: rgba(24, 24, 27, 0.6);
+}
+
+@layer base {
+  :root, html.dark {
+    --background: var(--color-space-black);
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  color-scheme: dark;
+}
+
+.glass-card {
+  background-color: var(--color-glass-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.floating-effect {
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+}
+
+.floating-effect:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+}
