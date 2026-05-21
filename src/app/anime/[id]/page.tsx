@@ -5,7 +5,6 @@ import { animeDetailToCard, getAnime, getFirstEpisode } from "@/lib/anime-api";
 import { AnimeResponse } from "@/types/anime-api";
 import WatchlistButton from "@/components/WatchlistButton";
 import PlayNowButton from "@/components/PlayNowButton";
-import { AdsterraNative, AdsterraRectangle } from "@/components/AdsterraAds";
 import type { Metadata } from "next";
 
 export const revalidate = 3600;
@@ -99,8 +98,6 @@ export default async function AnimeDetail({
             <InfoRow label="Studio" value={anime.info.studio || "Unknown"} />
           </div>
         </div>
-
-        <AdsterraRectangle />
       </aside>
 
       <main className="flex-1 flex flex-col gap-10">
@@ -133,8 +130,6 @@ export default async function AnimeDetail({
             {anime.synopsis || "No synopsis available."}
           </p>
         </section>
-
-        <AdsterraNative />
 
         <section className="mt-2 border-t border-white/5 pt-10">
           <div className="mb-6 flex items-center justify-between gap-4">
