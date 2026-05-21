@@ -1,6 +1,7 @@
 import Hero from "@/components/Hero";
 import AnimeCard from "@/components/AnimeCard";
 import AnimeSkeleton from "@/components/AnimeSkeleton";
+import { AdsterraLeaderboard } from "@/components/AdsterraAds";
 import { getGenre, getHome, isAnimeApiConfigured, toAnimeCardData } from "@/lib/anime-api";
 import { AnimeCardData, HomeAnimeItem } from "@/types/anime-api";
 import Link from "next/link";
@@ -94,6 +95,8 @@ export default async function Home() {
           </Link>
           <div className="absolute right-0 sm:right-20 top-1/2 -translate-y-1/2 w-48 h-48 bg-indigo-600/20 blur-3xl rounded-full group-hover:bg-indigo-500/30 transition-colors" />
         </div>
+
+        <AdsterraLeaderboard className="mb-12" />
 
         <div className="mb-6 flex items-end justify-between">
           <div>

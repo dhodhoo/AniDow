@@ -1,6 +1,7 @@
 import { getAnime, getEpisode } from "@/lib/anime-api";
 import VideoPlayer from "@/components/VideoPlayer";
 import EpisodeList from "@/components/EpisodeList";
+import { AdsterraLeaderboard } from "@/components/AdsterraAds";
 import { Download, ExternalLink, Star } from "lucide-react";
 import type { Metadata } from "next";
 import type { AnimeResponse, DownloadGroup, EpisodeResponse } from "@/types/anime-api";
@@ -78,6 +79,8 @@ export default async function WatchPage({
             Streaming mirror tidak tersedia untuk episode ini.
           </div>
         )}
+
+        <AdsterraLeaderboard />
 
         <div className="glass-card p-6 md:p-8 rounded-2xl flex flex-col gap-5 border border-white/5 mt-2">
           <div className="flex flex-wrap gap-2">
