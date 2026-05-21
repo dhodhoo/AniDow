@@ -35,13 +35,13 @@ Default API base URL:
 ANIDOW_API_BASE_URL=https://your-private-api.example.com
 ```
 
-Jika API menggunakan key, tambahkan:
+Jika API pribadi menggunakan key, tambahkan:
 
 ```env
-ANIDOW_API_KEY=your_api_key
+OTAKUDESU_API_KEY=your_api_key
 ```
 
-Variabel env ini dibaca server-side oleh wrapper di `src/lib/anime-api.ts`. Browser tidak memanggil API langsung.
+Variabel env ini dibaca server-side oleh wrapper di `src/lib/anime-api.ts`. Browser tidak memanggil backend langsung; jika butuh akses dari client, gunakan proxy internal `/api/anime-proxy/*` supaya header API key tetap dikirim dari server Vercel.
 
 Endpoint utama yang digunakan:
 
@@ -74,7 +74,7 @@ npm install
 
 ```env
 ANIDOW_API_BASE_URL=https://your-private-api.example.com
-ANIDOW_API_KEY=
+OTAKUDESU_API_KEY=
 ```
 
 4. Jalankan dev server:

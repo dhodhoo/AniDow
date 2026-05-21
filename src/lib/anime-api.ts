@@ -30,21 +30,27 @@ interface ApiOptions {
 }
 
 function getBaseUrl() {
-  const baseUrl = process.env.ANIDOW_API_BASE_URL;
+  const baseUrl =
+    process.env.ANIDOW_API_BASE_URL ||
+    process.env.OTAKUDESU_API_BASE_URL;
 
   if (!baseUrl) {
-    throw new AnimeApiError(500, {}, "ANIDOW_API_BASE_URL is not configured.");
+    throw new AnimeApiError(500, {}, "Anime API base URL is not configured.");
   }
 
   return baseUrl.replace(/\/$/, "");
 }
 
 export function isAnimeApiConfigured() {
-  return Boolean(process.env.ANIDOW_API_BASE_URL);
+  return Boolean((process.env.ANIDOW_API_BASE_URL || process.env.OTAKUDESU_API_BASE_URL) && getApiKey());
 }
 
 async function readJson(response: Response) {
   return response.json().catch(() => ({}));
+}
+
+function getApiKey() {
+  return process.env.OTAKUDESU_API_KEY;
 }
 
 export async function animeApi<T>(path: string, options: ApiOptions = {}): Promise<T> {
@@ -57,8 +63,9 @@ export async function animeApi<T>(path: string, options: ApiOptions = {}): Promi
   }
 
   const headers: HeadersInit = {};
-  if (process.env.ANIDOW_API_KEY) {
-    headers["X-API-Key"] = process.env.ANIDOW_API_KEY;
+  const apiKey = getApiKey();
+  if (apiKey) {
+    headers["X-API-Key"] = apiKey;
   }
 
   const response = await fetch(url, {
