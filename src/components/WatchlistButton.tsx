@@ -3,25 +3,19 @@
 import { motion } from "framer-motion";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { useWatchlist } from "@/hooks/useWatchlist";
-import { Anime } from "@/types/jikan";
-import { useState, useEffect } from "react";
+import { AnimeCardData } from "@/types/anime-api";
 
-export default function WatchlistButton({ anime }: { anime: Anime }) {
+export default function WatchlistButton({ anime }: { anime: AnimeCardData }) {
   const { isSaved, toggleWatchlist, isLoaded } = useWatchlist();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Use Skeleton fallback if not hydrated to avoid Hydration Mismatch issues on NextJS
-  if (!mounted || !isLoaded) {
+  if (!isLoaded) {
     return (
       <div className="w-56 h-12 bg-zinc-800/50 animate-pulse rounded-full border border-white/5" />
     );
   }
 
-  const saved = isSaved(anime.mal_id);
+  const saved = isSaved(anime.slug);
 
   return (
     <motion.button 

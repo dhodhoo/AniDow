@@ -49,9 +49,14 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2">
           <motion.div 
             whileHover={{ scale: 1.05, rotate: 5 }}
-            className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.3)] transition-all"
+            className="relative w-10 h-10 rounded-full overflow-hidden bg-white/95 flex items-center justify-center border border-indigo-300/60 shadow-[0_0_18px_rgba(168,85,247,0.35)] transition-all shrink-0"
           >
-            <div className="w-3 h-3 rounded-full bg-indigo-400" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.png"
+              alt="AniDow logo"
+              className="h-full w-full object-cover"
+            />
           </motion.div>
           <span className="font-bold text-xl tracking-tight text-white hover:text-indigo-400 transition-colors hidden sm:block">
             AniDow

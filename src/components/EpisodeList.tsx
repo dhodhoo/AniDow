@@ -1,17 +1,21 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Episode } from "@/lib/stream";
+import { EpisodeListItem, EpisodeRef } from "@/types/anime-api";
 import Link from "next/link";
 import { PlayCircle } from "lucide-react";
 
 interface EpisodeListProps {
-  animeId: string;
-  episodes: Episode[];
-  currentEpisode: number;
+  episodes: Array<EpisodeRef | EpisodeListItem>;
+  currentEpisodeSlug: string;
 }
 
-export default function EpisodeList({ animeId, episodes, currentEpisode }: EpisodeListProps) {
+function getEpisodeLabel(ep: EpisodeRef | EpisodeListItem) {
+  if ("label" in ep) return ep.label;
+  return ep.episode ? `Episode ${ep.episode}` : ep.title;
+}
+
+export default function EpisodeList({ episodes, currentEpisodeSlug }: EpisodeListProps) {
   return (
     <div className="flex flex-col h-full bg-[#0a0a0a]/60 glass-card rounded-2xl border border-white/5 overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
        <div className="p-4 border-b border-white/5 bg-[#050505]/40 backdrop-blur-md shrink-0">
@@ -26,9 +30,9 @@ export default function EpisodeList({ animeId, episodes, currentEpisode }: Episo
                        [&::-webkit-scrollbar-thumb]:bg-zinc-800 
                        [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-zinc-600 transition-colors">
           {episodes.map((ep, i) => {
-            const isActive = ep.number === currentEpisode;
+            const isActive = ep.slug === currentEpisodeSlug;
             return (
-              <Link key={ep.id} href={`/watch/${animeId}?ep=${ep.number}`} scroll={false}>
+              <Link key={ep.slug} href={`/watch/${ep.slug}`} scroll={false}>
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -40,11 +44,11 @@ export default function EpisodeList({ animeId, episodes, currentEpisode }: Episo
                   }`}
                 >
                   <div className={`flex items-center justify-center shrink-0 w-8 h-8 rounded-lg ${isActive ? "bg-indigo-500 text-white shadow-[0_0_10px_rgba(99,102,241,0.5)]" : "bg-zinc-900 text-zinc-500 font-medium"}`}>
-                    <span className="text-xs">{ep.number}</span>
+                    <span className="text-xs">{"episode" in ep ? ep.episode || i + 1 : i + 1}</span>
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className={`text-sm font-semibold truncate ${isActive ? "text-white" : "text-zinc-400"}`}>
-                      {ep.title || `Episode ${ep.number}`}
+                      {getEpisodeLabel(ep)}
                     </span>
                     {isActive && <span className="text-[10px] text-indigo-400 uppercase tracking-widest font-bold mt-0.5 animate-pulse">Sedang Putar</span>}
                   </div>

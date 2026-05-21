@@ -1,8 +1,8 @@
-import AnimeCard from "@/components/AnimeCard";
-import { fetchJikanAPI } from "@/lib/jikan";
-import { JikanResponse, Anime } from "@/types/jikan";
+import { getAnimeList, searchAnimeEntries } from "@/lib/anime-api";
+import { AnimeListEntry } from "@/types/anime-api";
+import { Clapperboard } from "lucide-react";
+import Link from "next/link";
 
-// Always Fetch dynamically based on search Params
 export const dynamic = "force-dynamic";
 
 export default async function SearchPage({
@@ -12,7 +12,7 @@ export default async function SearchPage({
 }) {
   const params = await searchParams;
   const query = params.q || "";
-  
+
   if (!query) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -21,10 +21,11 @@ export default async function SearchPage({
     );
   }
 
-  let results: Anime[] = [];
+  let results: AnimeListEntry[] = [];
   try {
-    const data = await fetchJikanAPI<JikanResponse<Anime[]>>(`/anime?q=${encodeURIComponent(query)}&limit=20`);
-    results = data.data || [];
+    const data = await getAnimeList();
+    const entries = data.groups.flatMap((group) => group.anime);
+    results = searchAnimeEntries(entries, query).slice(0, 40);
   } catch (error) {
     console.error("Search API Error:", error);
   }
@@ -33,13 +34,34 @@ export default async function SearchPage({
     <div className="flex flex-col gap-8 animate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Hasil Pencarian: &quot;{query}&quot;</h1>
-        <p className="text-zinc-400">Ditemukan {results.length} hasil kecocokan</p>
+        <p className="text-zinc-400">Ditemukan {results.length} judul anime dari direktori API pribadi</p>
       </div>
 
       {results.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {results.map((anime, index) => (
-            <AnimeCard key={`${anime.mal_id}-${index}`} anime={anime} index={index} priority={index < 10} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {results.map((item, index) => (
+            <Link
+              key={`${item.slug}-${index}`}
+              href={`/anime/${item.slug}`}
+              className="glass-card group flex items-center gap-4 rounded-2xl p-4 border border-white/5 hover:border-indigo-500/40 transition-colors"
+            >
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                <Clapperboard className="h-6 w-6" />
+              </div>
+              <div className="min-w-0">
+                <div className="mb-2">
+                  <span className="rounded-md bg-zinc-800/80 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    Anime
+                  </span>
+                </div>
+                <h2 className="truncate font-bold text-zinc-100 group-hover:text-indigo-300 transition-colors">
+                  {item.title}
+                </h2>
+                {item.fullTitle && item.fullTitle !== item.title && (
+                  <p className="mt-1 truncate text-xs text-zinc-500">{item.fullTitle}</p>
+                )}
+              </div>
+            </Link>
           ))}
         </div>
       ) : (

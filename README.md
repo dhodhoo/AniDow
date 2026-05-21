@@ -1,55 +1,120 @@
-# 🌌 AniDow — Elegant Anime Exploration & Streaming
+# AniDow
 
-AniDow adalah platform penjelajahan dan streaming anime modern yang dibangun dengan fokus pada estetika **Night Sky**. Menggabungkan kecepatan Next.js 16 dengan animasi halus dari Framer Motion untuk memberikan pengalaman menonton yang imersif dan berkelas.
+AniDow adalah web anime berbasis Next.js untuk menjelajah katalog pribadi, membaca detail anime, menonton episode lewat mirror iframe, menyimpan watchlist, melanjutkan riwayat tontonan, dan membuka link download per kualitas/host.
 
-## ✨ Fitur Unggulan
+Project ini menggunakan branding logo custom di navbar dan favicon, dengan tampilan gelap bertema night-sky.
 
-- **🎬 Cinematic Player**: Pemutar video dengan fitur **"Lights Out"** (meredupkan seluruh UI) untuk fokus maksimal.
-- **🚀 Advanced History Tracker**: Mengingat episode terakhir yang Anda tonton secara otomatis menggunakan `localStorage`.
-- **📂 Global Browse Directory**: Jelajahi ribuan judul anime berdasarkan genre (Aksi, Romansa, Komedi, dll) dengan sistem *pagination*.
-- **🔖 Watchlist System**: Simpan anime favorit Anda ke daftar tontonan pribadi tanpa perlu login.
-- **✨ Fluid Transitions**: Perpindahan antar halaman yang sangat halus menggunakan kurva animasi kustom.
-- **🔍 Smart Search**: Pencarian anime dengan fitur *debounce* untuk performa API yang optimal.
-- **📱 Ultra Responsive**: Pengalaman menonton yang sama baiknya di perangkat mobile maupun desktop.
+## Fitur
 
-## 🛠️ Teknologi yang Digunakan
+- Katalog anime ongoing dan complete dari API pribadi.
+- Browse berdasarkan status rilis dan genre.
+- Search berbasis daftar judul anime, bukan daftar episode, supaya hasil pencarian lebih enak dipakai.
+- Halaman detail anime dengan poster, metadata, sinopsis, genre, dan daftar episode asli.
+- Cinematic player dengan fitur Lights Out.
+- Mirror selector untuk memilih iframe streaming yang tersedia.
+- Panel download per kualitas dan host eksternal.
+- Watchlist lokal berbasis `localStorage`.
+- History tontonan lokal berbasis slug anime dan episode.
+- Responsive UI untuk desktop dan mobile.
 
-- **Framework**: [Next.js 16](https://nextjs.org/) (App Router & Turbopack)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **API Data**: [Jikan API v4](https://jikan.moe/) (Unofficial MyAnimeList API)
-- **Database Lokal**: Browser `localStorage`
+## Teknologi
 
-## 🚀 Cara Menjalankan Secara Lokal
+- Framework: Next.js 16 App Router
+- UI: React 19
+- Styling: Tailwind CSS v4
+- Animasi: Framer Motion
+- Icon: Lucide React
+- API data: API pribadi
+- Storage lokal: browser `localStorage`
 
-1. **Clone repositori**:
-   ```bash
-   git clone https://github.com/dhodhoo/AniDow.git
-   cd AniDow
-   ```
+## API
 
-2. **Instal dependensi**:
-   ```bash
-   npm install
-   ```
+Default API base URL:
 
-3. **Jalankan server pengembangan**:
-   ```bash
-   npm run dev
-   ```
+```env
+ANIDOW_API_BASE_URL=https://your-private-api.example.com
+```
 
-4. **Buka di browser**:
-   Kunjungi `http://localhost:3000`
+Jika API menggunakan key, tambahkan:
 
-## 📡 Integrasi API & Rate Limiting
+```env
+ANIDOW_API_KEY=your_api_key
+```
 
-Proyek ini menggunakan **Jikan API**. Karena batasan *rate limit* publik (3 request/detik), AniDow dilengkapi dengan:
-- **Sequential Fetching**: Pengambilan data kategori di halaman utama dilakukan secara berurutan dengan jeda (*backoff*).
-- **Manual Backoff Logic**: Penanganan otomatis jika terkena HTTP 429 (Too Many Requests).
+Variabel env ini dibaca server-side oleh wrapper di `src/lib/anime-api.ts`. Browser tidak memanggil API langsung.
 
-## 📄 Lisensi & Kredit
+Endpoint utama yang digunakan:
 
-- **Project gabut by [@dhodho](https://github.com/dhodhoo/AniDow)**
-- Gambar & Detail Anime: [MyAnimeList](https://myanimelist.net/)
-- Video Mockup: [YouTube API](https://developers.google.com/youtube/iframe_api_reference)
+- `/api/home`
+- `/api/ongoing?page=1`
+- `/api/complete?page=1`
+- `/api/anime-list`
+- `/api/genres`
+- `/api/genre/:slug?page=1`
+- `/api/search?q=keyword`
+- `/api/anime/:slug`
+- `/api/episode/:slug`
+
+## Menjalankan Lokal
+
+1. Clone repo:
+
+```bash
+git clone https://github.com/dhodhoo/AniDow.git
+cd AniDow
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Buat `.env.local` jika ingin override API:
+
+```env
+ANIDOW_API_BASE_URL=https://your-private-api.example.com
+ANIDOW_API_KEY=
+```
+
+4. Jalankan dev server:
+
+```bash
+npm run dev
+```
+
+5. Buka:
+
+```text
+http://localhost:3000
+```
+
+## Scripts
+
+```bash
+npm run dev     # menjalankan development server
+npm run build   # production build
+npm run start   # menjalankan build production
+npm run lint    # ESLint
+```
+
+## Struktur Penting
+
+```text
+src/app/                  # route utama Next.js
+src/components/           # komponen UI
+src/hooks/                # watchlist dan history localStorage
+src/lib/anime-api.ts      # API wrapper dan mapper data pribadi
+src/types/anime-api.ts    # tipe response API
+public/logo.png           # logo navbar
+public/logo-icon.png      # favicon/app icon
+```
+
+## Catatan Legal
+
+Project ini dibuat untuk eksplorasi teknis dan penggunaan pribadi. Pastikan penggunaan data, streaming, download, iklan, atau distribusi publik mematuhi hukum, hak cipta, dan Terms of Service sumber terkait. Jika ingin memonetisasi project ini, pendekatan yang lebih aman adalah mengembangkan sisi discovery, watchlist, jadwal, review, artikel original, atau affiliate legal.
+
+## Kredit
+
+- Project by [@dhodho](https://github.com/dhodhoo/AniDow)
+- Data dan link episode dikonsumsi melalui API pribadi yang di-host terpisah.

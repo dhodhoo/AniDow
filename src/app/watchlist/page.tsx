@@ -30,7 +30,7 @@ export default function WatchlistPage() {
       ) : watchlist.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 animate-in slide-in-from-bottom-8 duration-700 fade-in">
           {watchlist.map((anime, index) => (
-            <AnimeCard key={anime.mal_id} anime={anime} index={index} />
+            <AnimeCard key={anime.slug} anime={anime} index={index} />
           ))}
         </div>
       ) : (

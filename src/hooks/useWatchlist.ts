@@ -1,44 +1,63 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Anime } from "@/types/jikan";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { AnimeCardData } from "@/types/anime-api";
 
-export function useWatchlist() {
-  const [watchlist, setWatchlist] = useState<Anime[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+const WATCHLIST_KEY = "anidow_private_watchlist";
+const WATCHLIST_EVENT = "anidow_private_watchlist_change";
+const EMPTY_WATCHLIST = "[]";
 
-  useEffect(() => {
-    // Client-side hydration of localStorage
-    const stored = window.localStorage.getItem("anidow_watchlist");
-    if (stored) {
-      try {
-        setWatchlist(JSON.parse(stored));
-      } catch (e) {
-        console.error("Failed to parse watchlist", e);
-      }
-    }
-    setIsLoaded(true);
-  }, []);
+function getWatchlistSnapshot() {
+  return window.localStorage.getItem(WATCHLIST_KEY) ?? EMPTY_WATCHLIST;
+}
 
-  const toggleWatchlist = (anime: Anime) => {
-    setWatchlist((prev) => {
-      const isCurrentlySaved = prev.some((item) => item.mal_id === anime.mal_id);
-      let updatedList;
-      
-      if (isCurrentlySaved) {
-        // Hapus jika sudah ada
-        updatedList = prev.filter((item) => item.mal_id !== anime.mal_id);
-      } else {
-        // Tambahkan ke urutan paling atas jika belum ada
-        updatedList = [anime, ...prev]; 
-      }
-      
-      window.localStorage.setItem("anidow_watchlist", JSON.stringify(updatedList));
-      return updatedList;
-    });
+function getServerSnapshot() {
+  return EMPTY_WATCHLIST;
+}
+
+function subscribeToWatchlist(callback: () => void) {
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === WATCHLIST_KEY) callback();
   };
 
-  const isSaved = (mal_id: number) => watchlist.some((item) => item.mal_id === mal_id);
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(WATCHLIST_EVENT, callback);
 
-  return { watchlist, isLoaded, toggleWatchlist, isSaved };
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(WATCHLIST_EVENT, callback);
+  };
+}
+
+function parseWatchlist(raw: string): AnimeCardData[] {
+  try {
+    return JSON.parse(raw) as AnimeCardData[];
+  } catch (error) {
+    console.error("Failed to parse watchlist", error);
+    return [];
+  }
+}
+
+export function useWatchlist() {
+  const rawWatchlist = useSyncExternalStore(
+    subscribeToWatchlist,
+    getWatchlistSnapshot,
+    getServerSnapshot
+  );
+  const watchlist = useMemo(() => parseWatchlist(rawWatchlist), [rawWatchlist]);
+
+  const toggleWatchlist = useCallback((anime: AnimeCardData) => {
+    const currentList = parseWatchlist(getWatchlistSnapshot());
+    const isCurrentlySaved = currentList.some((item) => item.slug === anime.slug);
+    const updatedList = isCurrentlySaved
+      ? currentList.filter((item) => item.slug !== anime.slug)
+      : [anime, ...currentList];
+
+    window.localStorage.setItem(WATCHLIST_KEY, JSON.stringify(updatedList));
+    window.dispatchEvent(new Event(WATCHLIST_EVENT));
+  }, []);
+
+  const isSaved = (slug: string) => watchlist.some((item) => item.slug === slug);
+
+  return { watchlist, isLoaded: true, toggleWatchlist, isSaved };
 }

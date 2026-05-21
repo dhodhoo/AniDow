@@ -5,24 +5,29 @@ import { GripHorizontal, FastForward } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useHistory } from "@/hooks/useHistory";
 import Link from "next/link";
+import { Mirror } from "@/types/anime-api";
 
 interface VideoPlayerProps {
   embedUrl: string;
   title: string;
-  episodeNumber: number;
-  animeId: number;
-  hasNextEpisode: boolean;
+  episodeSlug: string;
+  episodeLabel: string;
+  animeSlug: string;
+  mirrors: Mirror[];
+  nextEpisodeSlug?: string | null;
 }
 
-export default function VideoPlayer({ embedUrl, title, episodeNumber, animeId, hasNextEpisode }: VideoPlayerProps) {
+export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel, animeSlug, mirrors, nextEpisodeSlug }: VideoPlayerProps) {
   const [lightsOut, setLightsOut] = useState(false);
+  const [selectedMirror, setSelectedMirror] = useState("default");
   const { saveHistory } = useHistory();
+  const playableMirrors = mirrors.filter((mirror) => mirror.iframeUrl);
+  const activeMirror = playableMirrors.find((mirror) => `${mirror.quality}-${mirror.mirrorIndex}` === selectedMirror);
+  const activeEmbedUrl = activeMirror?.iframeUrl || embedUrl;
 
-  // Watch Hook Triggerer based on Props resolution
   useEffect(() => {
-    saveHistory(animeId, episodeNumber);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [animeId, episodeNumber]);
+    saveHistory({ animeSlug, episodeSlug, episodeLabel, title });
+  }, [animeSlug, episodeLabel, episodeSlug, saveHistory, title]);
 
   return (
     <>
@@ -45,22 +50,23 @@ export default function VideoPlayer({ embedUrl, title, episodeNumber, animeId, h
           
           {/* IFrame Embedded Control */}
           <iframe 
-             src={embedUrl}
+             src={activeEmbedUrl}
              className="w-full h-full border-none z-0 relative"
              allowFullScreen
              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+             title={title}
           />
 
           {/* Cinematic Overlay Title */}
           <div className="absolute top-0 w-full p-4 lg:p-6 bg-gradient-to-b from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex justify-between z-20">
             <h2 className="text-white font-bold tracking-tight text-sm md:text-xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-               {title} - Episode {episodeNumber}
+               {title} - {episodeLabel}
             </h2>
           </div>
 
           <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 flex items-center gap-2 lg:gap-3">
-             {hasNextEpisode && (
-               <Link href={`/watch/${animeId}?ep=${episodeNumber + 1}`} scroll={false}>
+             {nextEpisodeSlug && (
+               <Link href={`/watch/${nextEpisodeSlug}`} scroll={false}>
                  <button className="flex items-center gap-1.5 lg:gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-3 lg:px-4 py-2 rounded-xl text-[10px] lg:text-xs font-bold transition-all border border-white/20 shadow-lg">
                     <FastForward className="w-3 h-3 lg:w-4 lg:h-4 text-white" />
                     <span className="hidden sm:inline">Episode Selanjutnya</span>
@@ -77,6 +83,28 @@ export default function VideoPlayer({ embedUrl, title, episodeNumber, animeId, h
              </button>
           </div>
         </div>
+        {playableMirrors.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedMirror("default")}
+              className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${selectedMirror === "default" ? "border-indigo-400 bg-indigo-600 text-white" : "border-white/10 bg-zinc-900/70 text-zinc-400 hover:text-white"}`}
+            >
+              Default
+            </button>
+            {playableMirrors.map((mirror) => {
+              const key = `${mirror.quality}-${mirror.mirrorIndex}`;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setSelectedMirror(key)}
+                  className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${selectedMirror === key ? "border-indigo-400 bg-indigo-600 text-white" : "border-white/10 bg-zinc-900/70 text-zinc-400 hover:text-white"}`}
+                >
+                  {mirror.quality} {mirror.host ? `- ${mirror.host}` : ""}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     </>
   );

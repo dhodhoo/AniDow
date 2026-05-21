@@ -1,13 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Anime } from "@/types/jikan";
+import { HomeAnimeItem } from "@/types/anime-api";
 import Image from "next/image";
 import Link from "next/link";
 import { Play } from "lucide-react";
 
 interface HeroProps {
-  anime: Anime | null;
+  anime: HomeAnimeItem | null;
 }
 
 export default function Hero({ anime }: HeroProps) {
@@ -23,7 +23,7 @@ export default function Hero({ anime }: HeroProps) {
       {/* Background Image Overlay */}
       <div className="absolute inset-0">
         <Image
-          src={anime.trailer?.images?.maximum_image_url || anime.images.webp.large_image_url}
+          src={anime.image}
           alt={anime.title}
           fill
           priority // Highest priority for rendering Above the fold LCP component
@@ -42,32 +42,35 @@ export default function Hero({ anime }: HeroProps) {
            animate={{ opacity: 1, y: 0 }}
            transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
         >
-          {anime.genres && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {anime.genres.slice(0, 3).map(g => (
-                <span key={g.mal_id} className="text-[10px] sm:text-xs font-semibold px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30 backdrop-blur-md">
-                  {g.name}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {anime.currentEpisode && (
+              <span className="text-[10px] sm:text-xs font-semibold px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30 backdrop-blur-md">
+                Episode {anime.currentEpisode}
+              </span>
+            )}
+            {anime.day && (
+              <span className="text-[10px] sm:text-xs font-semibold px-3 py-1 bg-white/10 text-zinc-200 rounded-full border border-white/15 backdrop-blur-md">
+                {anime.day}
+              </span>
+            )}
+          </div>
           
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white tracking-tighter mb-4 drop-shadow-lg line-clamp-2">
-            {anime.title || anime.title_english}
+            {anime.title}
           </h1>
           
           <p className="text-zinc-300 text-sm md:text-base line-clamp-3 mb-6 max-w-2xl leading-relaxed">
-            {anime.synopsis}
+            Update terbaru AniDow dari API pribadi. Streaming subtitle Indonesia dengan pilihan mirror dan link download.
           </p>
 
-          <Link href={`/anime/${anime.mal_id}`}>
+          <Link href={`/anime/${anime.slug}`}>
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="flex items-center justify-center gap-2 bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-zinc-200 transition-colors"
             >
               <Play className="w-4 h-4 fill-black" />
-              <span>Saksikan Trailer</span>
+              <span>Lihat Detail</span>
             </motion.button>
           </Link>
         </motion.div>
