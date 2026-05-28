@@ -61,7 +61,7 @@ export default async function Home() {
       ongoing = home.ongoing;
       complete = home.complete;
     } catch (error) {
-      console.error("Homepage API pribadi loading failed:", error);
+      console.error("Homepage anime loading failed:", error);
     }
   }
 
@@ -83,7 +83,7 @@ export default async function Home() {
         <div className="mt-8 mb-12 flex items-center justify-between border border-white/10 bg-zinc-900/50 p-6 rounded-2xl glass-card relative overflow-hidden group">
           <div className="relative z-10 flex flex-col gap-1">
             <h3 className="text-lg sm:text-2xl font-black text-white tracking-tight">Perpustakaan AniDow</h3>
-            <p className="text-xs sm:text-sm text-zinc-400">Jajaki katalog API pribadi dengan episode, streaming, dan download asli.</p>
+            <p className="text-xs sm:text-sm text-zinc-400">Jajaki katalog anime lengkap dengan episode, streaming, dan download.</p>
           </div>
           <Link href="/browse">
             <button className="relative z-10 flex items-center gap-2 bg-white text-black hover:bg-zinc-200 px-4 sm:px-6 py-3 rounded-xl font-bold transition-all shadow-xl group-hover:scale-105 active:scale-95 text-xs sm:text-sm">
@@ -98,7 +98,7 @@ export default async function Home() {
         <div className="mb-6 flex items-end justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white tracking-tight mb-2">Update Ongoing Terbaru</h2>
-            <p className="text-sm text-zinc-400">Episode terbaru subtitle Indonesia, langsung dari katalog API pribadi.</p>
+            <p className="text-sm text-zinc-400">Episode terbaru subtitle Indonesia, langsung dari katalog AniDow.</p>
           </div>
           <Link href="/browse?type=ongoing" className="shrink-0 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors bg-white/5 py-1 px-3 rounded-md border border-white/5">
             <span className="hidden sm:inline">Lihat Ongoing</span> <ChevronRight className="w-4 h-4" />

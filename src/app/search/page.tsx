@@ -1,5 +1,5 @@
-import { getAnimeList, searchAnimeEntries } from "@/lib/anime-api";
-import { AnimeListEntry } from "@/types/anime-api";
+import { searchAnimeTitles } from "@/lib/anime-api";
+import { SearchAnimeItem } from "@/types/anime-api";
 import { Clapperboard } from "lucide-react";
 import Link from "next/link";
 
@@ -21,11 +21,10 @@ export default async function SearchPage({
     );
   }
 
-  let results: AnimeListEntry[] = [];
+  let results: SearchAnimeItem[] = [];
   try {
-    const data = await getAnimeList();
-    const entries = data.groups.flatMap((group) => group.anime);
-    results = searchAnimeEntries(entries, query).slice(0, 40);
+    const data = await searchAnimeTitles(query, 1, 40);
+    results = data.items;
   } catch (error) {
     console.error("Search API Error:", error);
   }
@@ -34,7 +33,7 @@ export default async function SearchPage({
     <div className="flex flex-col gap-8 animate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Hasil Pencarian: &quot;{query}&quot;</h1>
-        <p className="text-zinc-400">Ditemukan {results.length} judul anime dari direktori API pribadi</p>
+        <p className="text-zinc-400">Ditemukan {results.length} judul anime dari katalog AniDow</p>
       </div>
 
       {results.length > 0 ? (
@@ -57,8 +56,10 @@ export default async function SearchPage({
                 <h2 className="truncate font-bold text-zinc-100 group-hover:text-indigo-300 transition-colors">
                   {item.title}
                 </h2>
-                {item.fullTitle && item.fullTitle !== item.title && (
-                  <p className="mt-1 truncate text-xs text-zinc-500">{item.fullTitle}</p>
+                {(item.status || item.totalEpisodes || item.episodes) && (
+                  <p className="mt-1 truncate text-xs text-zinc-500">
+                    {[item.status, item.totalEpisodes || item.episodes].filter(Boolean).join(" • ")}
+                  </p>
                 )}
               </div>
             </Link>

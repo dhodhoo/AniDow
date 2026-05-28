@@ -60,7 +60,7 @@ export default function Hero({ anime }: HeroProps) {
           </h1>
           
           <p className="text-zinc-300 text-sm md:text-base line-clamp-3 mb-6 max-w-2xl leading-relaxed">
-            Update terbaru AniDow dari API pribadi. Streaming subtitle Indonesia dengan pilihan mirror dan link download.
+            Update terbaru AniDow. Streaming subtitle Indonesia dengan pilihan mirror dan link download.
           </p>
 
           <Link href={`/anime/${anime.slug}`}>

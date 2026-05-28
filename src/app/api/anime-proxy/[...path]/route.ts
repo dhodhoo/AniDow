@@ -32,7 +32,7 @@ export async function GET(
 
     return NextResponse.json(
       {
-        error: "API pribadi sedang tidak dapat diakses.",
+        error: "Layanan anime sedang tidak dapat diakses.",
       },
       {
         status: 502,

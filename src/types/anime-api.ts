@@ -1,8 +1,11 @@
 export interface Pagination {
-  current: number;
+  current?: number;
+  currentPage?: number;
   totalPages: number;
-  nextUrl: string | null;
-  prevUrl: string | null;
+  totalItems?: number;
+  hasNextPage?: boolean;
+  nextUrl?: string | null;
+  prevUrl?: string | null;
 }
 
 export interface HomeAnimeItem {
@@ -189,6 +192,42 @@ export interface AnimeListResponse {
   listUrl: string;
   totalAnime: number;
   groups: AnimeListGroup[];
+}
+
+export interface SearchAnimeItem {
+  title: string;
+  slug: string;
+  image?: string | null;
+  status?: string | null;
+  totalEpisodes?: string | null;
+  episodes?: string | null;
+  score?: string | null;
+  rating?: string | null;
+  genres?: string[];
+  synopsis?: string | null;
+  studio?: string | null;
+  season?: string | null;
+  date?: string | null;
+  currentEpisode?: string | null;
+  day?: string | null;
+}
+
+export interface SearchAnimeResponse {
+  query?: string;
+  keyword?: string;
+  count?: number;
+  items: SearchAnimeItem[];
+  pagination?: Pagination | null;
+}
+
+export interface SearchSuggestionItem {
+  title: string;
+  slug: string;
+}
+
+export interface SearchSuggestionsResponse {
+  query?: string;
+  items: SearchSuggestionItem[];
 }
 
 export interface GenreListResponse {

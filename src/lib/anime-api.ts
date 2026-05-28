@@ -10,7 +10,10 @@ import type {
   HomeAnimeItem,
   HomeResponse,
   ListResponse,
+  SearchAnimeItem,
+  SearchAnimeResponse,
   SearchResponse,
+  SearchSuggestionsResponse,
 } from "@/types/anime-api";
 
 export class AnimeApiError extends Error {
@@ -93,14 +96,17 @@ export async function animeApi<T>(path: string, options: ApiOptions = {}): Promi
 export const getHome = () => animeApi<HomeResponse>("/api/home", { revalidate: 600 });
 export const getOngoing = (page: number) => animeApi<ListResponse<HomeAnimeItem>>("/api/ongoing", { params: { page }, revalidate: 600 });
 export const getComplete = (page: number) => animeApi<ListResponse<HomeAnimeItem>>("/api/complete", { params: { page }, revalidate: 3600 });
+export const getAnimePage = (status: "ongoing" | "complete", page: number, limit = 24) => animeApi<ListResponse<SearchAnimeItem>>("/api/anime", { params: { status, page, limit }, revalidate: status === "complete" ? 3600 : 600 });
 export const getAnimeList = () => animeApi<AnimeListResponse>("/api/anime-list", { revalidate: 86400 });
 export const getGenres = () => animeApi<GenreListResponse>("/api/genres", { revalidate: 86400 });
 export const getGenre = (slug: string, page: number) => animeApi<ListResponse<GenreCardItem>>(`/api/genre/${slug}`, { params: { page }, revalidate: 1800 });
 export const searchAnime = (q: string) => animeApi<SearchResponse>("/api/search", { params: { q }, revalidate: 300 });
+export const searchAnimeTitles = (q: string, page = 1, limit = 40) => animeApi<SearchAnimeResponse>("/api/search/anime", { params: { q, page, limit }, revalidate: 300 });
+export const getSearchSuggestions = (q: string, limit = 8) => animeApi<SearchSuggestionsResponse>("/api/search/suggestions", { params: { q, limit }, revalidate: 300 });
 export const getAnime = (slug: string) => animeApi<AnimeResponse>(`/api/anime/${slug}`, { revalidate: 3600 });
 export const getEpisode = (slug: string, skipMirrors = false) => animeApi<EpisodeResponse>(`/api/episode/${slug}`, { params: { skipMirrors: skipMirrors ? 1 : undefined }, revalidate: 600 });
 
-export function toAnimeCardData(item: HomeAnimeItem | GenreCardItem): AnimeCardData {
+export function toAnimeCardData(item: HomeAnimeItem | GenreCardItem | SearchAnimeItem): AnimeCardData {
   return {
     title: item.title,
     slug: item.slug,

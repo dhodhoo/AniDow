@@ -1,5 +1,5 @@
 import AnimeCard from "@/components/AnimeCard";
-import { getComplete, getGenre, getGenres, getOngoing, toAnimeCardData } from "@/lib/anime-api";
+import { getAnimePage, getGenre, getGenres, toAnimeCardData } from "@/lib/anime-api";
 import { AnimeCardData, Genre } from "@/types/anime-api";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react";
@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Jelajahi Semua Anime - AniDow",
-  description: "Pustaka AniDow menyajikan katalog API pribadi dengan streaming dan download.",
+  description: "Pustaka AniDow menyajikan katalog anime dengan streaming dan download.",
 };
 
 export default async function BrowsePage({
@@ -37,9 +37,7 @@ export default async function BrowsePage({
       getGenres(),
       params.genre
         ? getGenre(params.genre, currentPage)
-        : type === "complete"
-          ? getComplete(currentPage)
-          : getOngoing(currentPage),
+        : getAnimePage(type, currentPage),
     ]);
     genres = genreList.genres;
     animeList = data.items.map(toAnimeCardData);
@@ -64,7 +62,7 @@ export default async function BrowsePage({
             Pustaka {currentCategoryLabel}
           </h1>
           <p className="text-zinc-400 leading-relaxed text-sm md:text-base">
-            Jelajahi katalog API pribadi berdasarkan status rilis dan genre, lengkap dengan episode streaming serta link download.
+            Jelajahi katalog anime berdasarkan status rilis dan genre, lengkap dengan episode streaming serta link download.
           </p>
         </div>
       </section>
