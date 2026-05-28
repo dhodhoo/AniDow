@@ -6,6 +6,12 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+interface SearchSuggestion {
+  title: string;
+  slug: string;
+}
+
+
 export default function Navbar() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -13,12 +19,50 @@ export default function Navbar() {
   
   const [isFocused, setIsFocused] = useState(false);
   const [search, setSearch] = useState(q);
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const timeoutRef = useRef<NodeJS.Timeout>(null);
+  const suggestionTimeoutRef = useRef<NodeJS.Timeout>(null);
 
   // Sinkronisasi teks pencarian saat user berpindah halaman melalui link
   useEffect(() => {
     setSearch(q);
   }, [q]);
+
+  useEffect(() => {
+    if (!search.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    if (suggestionTimeoutRef.current) {
+      clearTimeout(suggestionTimeoutRef.current);
+    }
+
+    const controller = new AbortController();
+    suggestionTimeoutRef.current = setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({ q: search, limit: "6" });
+        const response = await fetch(`/api/anime-proxy/search/suggestions?${params.toString()}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+
+        const data = await response.json() as { items?: SearchSuggestion[] };
+        setSuggestions(data.items ?? []);
+      } catch (error) {
+        if (error instanceof Error && error.name !== "AbortError") {
+          setSuggestions([]);
+        }
+      }
+    }, 250);
+
+    return () => {
+      controller.abort();
+      if (suggestionTimeoutRef.current) {
+        clearTimeout(suggestionTimeoutRef.current);
+      }
+    };
+  }, [search]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -35,6 +79,11 @@ export default function Navbar() {
         router.push('/');
       }
     }, 500);
+  };
+
+  const handleSuggestionClick = () => {
+    setIsFocused(false);
+    setSuggestions([]);
   };
 
   return (
@@ -80,9 +129,24 @@ export default function Navbar() {
                 onChange={handleSearchChange}
                 className="bg-transparent border-none outline-none text-sm text-zinc-200 placeholder:text-zinc-500 w-full"
                 onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
+                onBlur={() => setTimeout(() => setIsFocused(false), 150)}
               />
             </motion.div>
+
+            {isFocused && suggestions.length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-2 overflow-hidden rounded-xl border border-white/10 bg-zinc-950/95 shadow-2xl backdrop-blur-xl">
+                {suggestions.map((item) => (
+                  <Link
+                    key={item.slug}
+                    href={`/anime/${item.slug}`}
+                    onClick={handleSuggestionClick}
+                    className="block border-b border-white/5 px-4 py-3 text-sm font-medium text-zinc-200 transition-colors last:border-b-0 hover:bg-indigo-500/15 hover:text-indigo-300"
+                  >
+                    {item.title}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Quick Nav Links */}
