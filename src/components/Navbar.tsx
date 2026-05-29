@@ -20,51 +20,67 @@ export default function Navbar() {
   const [isFocused, setIsFocused] = useState(false);
   const [search, setSearch] = useState(q);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
-  const suggestionTimeoutRef = useRef<NodeJS.Timeout>(null);
-
-  // Sinkronisasi teks pencarian saat user berpindah halaman melalui link
-  useEffect(() => {
-    setSearch(q);
-  }, [q]);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const suggestionCacheRef = useRef(new Map<string, SearchSuggestion[]>());
 
   useEffect(() => {
-    if (!search.trim()) {
+    if (isFocused) return;
+
+    const timeout = setTimeout(() => {
+      setSearch(q);
+    }, 0);
+
+    return () => clearTimeout(timeout);
+  }, [isFocused, q]);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+
+  const loadSuggestions = async (value: string) => {
+    const query = value.trim();
+    abortControllerRef.current?.abort();
+
+    if (!query) {
       setSuggestions([]);
       return;
     }
 
-    if (suggestionTimeoutRef.current) {
-      clearTimeout(suggestionTimeoutRef.current);
+    const cacheKey = query.toLowerCase();
+    const cachedSuggestions = suggestionCacheRef.current.get(cacheKey);
+    if (cachedSuggestions) {
+      setSuggestions(cachedSuggestions);
+      return;
     }
 
     const controller = new AbortController();
-    suggestionTimeoutRef.current = setTimeout(async () => {
-      try {
-        const params = new URLSearchParams({ q: search, limit: "6" });
-        const response = await fetch(`/api/anime-proxy/search/suggestions?${params.toString()}`, {
-          signal: controller.signal,
-        });
-        if (!response.ok) return;
+    abortControllerRef.current = controller;
 
-        const data = await response.json() as { items?: SearchSuggestion[] };
-        setSuggestions(data.items ?? []);
-      } catch (error) {
-        if (error instanceof Error && error.name !== "AbortError") {
-          setSuggestions([]);
-        }
-      }
-    }, 120);
+    try {
+      const params = new URLSearchParams({ q: query, limit: "6" });
+      const response = await fetch(`/api/anime-proxy/search/suggestions?${params.toString()}`, {
+        signal: controller.signal,
+      });
+      if (!response.ok) return;
 
-    return () => {
-      controller.abort();
-      if (suggestionTimeoutRef.current) {
-        clearTimeout(suggestionTimeoutRef.current);
+      const data = await response.json() as { items?: SearchSuggestion[] };
+      const items = data.items ?? [];
+      suggestionCacheRef.current.set(cacheKey, items);
+      setSuggestions(items);
+    } catch (error) {
+      if (error instanceof Error && error.name !== "AbortError") {
+        setSuggestions([]);
       }
-    };
-  }, [search]);
+    }
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
+    const value = e.target.value;
+    setSearch(value);
+    setIsFocused(true);
+    loadSuggestions(value);
   };
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -123,7 +139,10 @@ export default function Navbar() {
                 value={search}
                 onChange={handleSearchChange}
                 className="bg-transparent border-none outline-none text-sm text-zinc-200 placeholder:text-zinc-500 w-full"
-                onFocus={() => setIsFocused(true)}
+                onFocus={() => {
+                  setIsFocused(true);
+                  loadSuggestions(search);
+                }}
                 onBlur={() => setTimeout(() => setIsFocused(false), 150)}
               />
             </motion.form>
