@@ -30,10 +30,10 @@ export default function AnimeCarousel({ title, description, animeList, routePara
   };
 
   return (
-    <section className="mt-10 relative group/carousel">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
+    <section className="mt-8 sm:mt-10 relative group/carousel">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-4 sm:mb-6 gap-3 sm:gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight mb-2 flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight mb-1.5 sm:mb-2 flex items-center gap-2">
             {title}
           </h2>
           <p className="text-sm text-zinc-400 max-w-2xl">{description}</p>
@@ -69,13 +69,13 @@ export default function AnimeCarousel({ title, description, animeList, routePara
           <div className="flex snap-x snap-mandatory gap-4 md:gap-6">
             {animeList.length > 0 ? (
               animeList.map((anime, index) => (
-                <div key={anime.slug} className="w-[46%] shrink-0 snap-start sm:w-[30%] md:w-[22%] lg:w-[18%] xl:w-[16%]">
+                <div key={anime.slug} className="w-[43%] shrink-0 snap-start sm:w-[30%] md:w-[22%] lg:w-[18%] xl:w-[16%]">
                   <AnimeCard anime={anime} index={index} priority={priority && index < 5} />
                 </div>
               ))
             ) : (
               Array.from({ length: skeletonCount }).map((_, i) => (
-                <div key={i} className="w-[46%] shrink-0 snap-start sm:w-[30%] md:w-[22%] lg:w-[18%] xl:w-[16%]">
+                <div key={i} className="w-[43%] shrink-0 snap-start sm:w-[30%] md:w-[22%] lg:w-[18%] xl:w-[16%]">
                   <AnimeSkeleton />
                 </div>
               ))

@@ -26,7 +26,7 @@ export default function RootLayout({
         <Suspense fallback={<div className="fixed top-0 left-0 right-0 z-50 px-6 py-4 pointer-events-none" />}>
           <Navbar />
         </Suspense>
-        <main className="pt-28 pb-10 px-6 w-full max-w-7xl mx-auto flex-grow">
+        <main className="pt-24 pb-8 px-4 sm:pt-28 sm:pb-10 sm:px-6 w-full max-w-7xl mx-auto flex-grow">
           {children}
         </main>
         <footer className="w-full text-center py-8 text-zinc-600/80 text-xs font-medium border-t border-white/5 mt-auto bg-[#0a0a0a]/30">

@@ -60,9 +60,9 @@ export default async function AnimeDetail({
   const cardData = animeDetailToCard(id, anime);
 
   return (
-    <div className="flex flex-col gap-10 lg:flex-row pb-12">
-      <aside className="w-full lg:w-[320px] flex-shrink-0 flex flex-col gap-6">
-        <div className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.8)] border border-white/10 group bg-zinc-950">
+    <div className="flex flex-col gap-8 lg:gap-10 lg:flex-row pb-10 lg:pb-12">
+      <aside className="w-full lg:w-[320px] flex-shrink-0 flex flex-col gap-5 lg:gap-6">
+        <div className="relative w-full max-w-[260px] mx-auto lg:max-w-none aspect-[3/4] rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.8)] border border-white/10 group bg-zinc-950">
           {anime.image && (
             <Image
               src={anime.image}
@@ -75,7 +75,7 @@ export default async function AnimeDetail({
           )}
         </div>
 
-        <div className="glass-card p-6 rounded-2xl flex flex-col gap-4">
+        <div className="glass-card p-5 sm:p-6 rounded-2xl flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-zinc-500 mb-1 font-semibold uppercase tracking-wider">Score</p>
@@ -100,7 +100,7 @@ export default async function AnimeDetail({
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col gap-10">
+      <main className="flex-1 flex flex-col gap-8 lg:gap-10">
         <div>
           <div className="flex flex-wrap gap-2 mb-5">
             {anime.info.genres.map((genre) => (
@@ -109,16 +109,16 @@ export default async function AnimeDetail({
               </span>
             ))}
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter mb-4 drop-shadow-md">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter mb-4 drop-shadow-md">
             {anime.info.judul || anime.title}
           </h1>
           {anime.info.japanese && (
-            <h2 className="text-xl text-zinc-400 font-medium tracking-tight mb-8">
+            <h2 className="text-base sm:text-xl text-zinc-400 font-medium tracking-tight mb-6 sm:mb-8">
               {anime.info.japanese}
             </h2>
           )}
 
-          <div className="flex items-center gap-4 border-b border-white/5 pb-8 flex-wrap">
+          <div className="grid grid-cols-1 sm:flex sm:items-center gap-3 sm:gap-4 border-b border-white/5 pb-6 sm:pb-8">
             <PlayNowButton animeSlug={id} episodes={anime.episodes} />
             <WatchlistButton anime={cardData} />
           </div>

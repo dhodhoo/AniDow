@@ -18,7 +18,7 @@ export default function Hero({ anime }: HeroProps) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="relative w-full h-[400px] md:h-[500px] mb-12 rounded-3xl overflow-hidden glass-card group"
+      className="relative w-full h-[320px] sm:h-[400px] md:h-[500px] mb-8 sm:mb-12 rounded-3xl overflow-hidden glass-card group"
     >
       {/* Background Image Overlay */}
       <div className="absolute inset-0">
@@ -36,7 +36,7 @@ export default function Hero({ anime }: HeroProps) {
       </div>
 
       {/* Floating Info Layout */}
-      <div className="relative z-10 h-full flex flex-col justify-end p-6 md:p-12 max-w-3xl">
+      <div className="relative z-10 h-full flex flex-col justify-end p-5 sm:p-6 md:p-12 max-w-3xl">
         <motion.div
            initial={{ opacity: 0, y: 30 }}
            animate={{ opacity: 1, y: 0 }}
@@ -55,11 +55,13 @@ export default function Hero({ anime }: HeroProps) {
             )}
           </div>
           
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white tracking-tighter mb-4 drop-shadow-lg line-clamp-2">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-white tracking-tighter mb-3 sm:mb-4 drop-shadow-lg line-clamp-2">
+
             {anime.title}
           </h1>
           
-          <p className="text-zinc-300 text-sm md:text-base line-clamp-3 mb-6 max-w-2xl leading-relaxed">
+          <p className="text-zinc-300 text-xs sm:text-sm md:text-base line-clamp-2 sm:line-clamp-3 mb-5 sm:mb-6 max-w-2xl leading-relaxed">
+
             Update terbaru AniDow. Streaming subtitle Indonesia dengan pilihan mirror dan link download.
           </p>
 
@@ -67,7 +69,7 @@ export default function Hero({ anime }: HeroProps) {
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center justify-center gap-2 bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-zinc-200 transition-colors"
+              className="flex items-center justify-center gap-2 bg-white text-black px-5 py-2.5 sm:px-6 sm:py-3 rounded-full font-semibold text-sm sm:text-base hover:bg-zinc-200 transition-colors"
             >
               <Play className="w-4 h-4 fill-black" />
               <span>Lihat Detail</span>

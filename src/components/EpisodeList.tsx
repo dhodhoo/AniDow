@@ -18,7 +18,7 @@ function getEpisodeLabel(ep: EpisodeRef | EpisodeListItem) {
 export default function EpisodeList({ episodes, currentEpisodeSlug }: EpisodeListProps) {
   return (
     <div className="flex flex-col h-full bg-[#0a0a0a]/60 glass-card rounded-2xl border border-white/5 overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-       <div className="p-4 border-b border-white/5 bg-[#050505]/40 backdrop-blur-md shrink-0">
+       <div className="p-3 sm:p-4 border-b border-white/5 bg-[#050505]/40 backdrop-blur-md shrink-0">
           <h3 className="text-lg font-bold tracking-tight text-zinc-100">Daftar Tayang</h3>
           <p className="text-xs text-zinc-500 mt-0.5">{episodes.length} Episodes Tersedia</p>
        </div>
@@ -37,7 +37,8 @@ export default function EpisodeList({ episodes, currentEpisodeSlug }: EpisodeLis
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: Math.min(i * 0.02, 0.5), duration: 0.3 }}
-                  className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-300 border ${
+                   className={`flex items-center gap-3 p-2.5 sm:p-3 rounded-xl cursor-pointer transition-all duration-300 border ${
+
                     isActive 
                       ? "bg-indigo-600/10 border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.15)]"
                       : "bg-[#111] border-transparent hover:bg-zinc-800/80 hover:border-zinc-700/50"
