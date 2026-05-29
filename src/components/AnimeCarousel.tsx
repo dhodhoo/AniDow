@@ -65,7 +65,7 @@ export default function AnimeCarousel({ title, description, animeList, routePara
         <div className="pointer-events-none absolute left-0 top-0 z-20 hidden h-full w-16 bg-gradient-to-r from-[#050505] to-transparent md:block" />
         <div className="pointer-events-none absolute right-0 top-0 z-20 hidden h-full w-16 bg-gradient-to-l from-[#050505] to-transparent md:block" />
 
-        <div ref={scrollRef} className="-mx-6 overflow-x-auto scroll-smooth px-6 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div ref={scrollRef} className="overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex snap-x snap-mandatory gap-4 md:gap-6">
             {animeList.length > 0 ? (
               animeList.map((anime, index) => (
