@@ -1,10 +1,9 @@
 import Hero from "@/components/Hero";
-import AnimeCard from "@/components/AnimeCard";
-import AnimeSkeleton from "@/components/AnimeSkeleton";
+import AnimeCarousel from "@/components/AnimeCarousel";
 import { getGenre, getHome, isAnimeApiConfigured, toAnimeCardData } from "@/lib/anime-api";
-import { AnimeCardData, HomeAnimeItem } from "@/types/anime-api";
+import { HomeAnimeItem } from "@/types/anime-api";
 import Link from "next/link";
-import { ChevronRight, LayoutGrid } from "lucide-react";
+import { LayoutGrid } from "lucide-react";
 
 export const revalidate = 600;
 
@@ -15,48 +14,11 @@ async function safeGenre(slug: string) {
 
   try {
     const data = await getGenre(slug, 1);
-    return data.items.map(toAnimeCardData).slice(0, 5);
+    return data.items.map(toAnimeCardData).slice(0, 12);
   } catch (error) {
     console.error(`Homepage genre ${slug} loading failed:`, error);
     return [];
   }
-}
-
-function AnimeCarousel({ title, description, animeList, routeParam, skeletonCount = 5, priority = false }: { title: string; description: string; animeList: AnimeCardData[]; routeParam: string; skeletonCount?: number; priority?: boolean }) {
-  return (
-    <section className="mt-16 relative">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight mb-2 flex items-center gap-2">
-            {title}
-          </h2>
-          <p className="text-sm text-zinc-400 max-w-2xl">{description}</p>
-        </div>
-        <Link href={`/browse?${routeParam}`} className="shrink-0 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors group bg-indigo-500/10 px-4 py-2 rounded-lg border border-indigo-500/20">
-          Lihat Semua
-          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-        </Link>
-      </div>
-
-      <div className="-mx-6 overflow-x-auto px-6 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div className="flex snap-x snap-mandatory gap-4 md:gap-6">
-          {animeList.length > 0 ? (
-            animeList.map((anime, index) => (
-              <div key={anime.slug} className="w-[46%] shrink-0 snap-start sm:w-[30%] md:w-[22%] lg:w-[18%] xl:w-[16%]">
-                <AnimeCard anime={anime} index={index} priority={priority && index < 5} />
-              </div>
-            ))
-          ) : (
-            Array.from({ length: skeletonCount }).map((_, i) => (
-              <div key={i} className="w-[46%] shrink-0 snap-start sm:w-[30%] md:w-[22%] lg:w-[18%] xl:w-[16%]">
-                <AnimeSkeleton />
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    </section>
-  );
 }
 
 export default async function Home() {
