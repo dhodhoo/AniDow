@@ -22,7 +22,7 @@ async function safeGenre(slug: string) {
   }
 }
 
-function CategoryRowView({ title, description, animeList, routeParam }: { title: string; description: string; animeList: AnimeCardData[]; routeParam: string }) {
+function AnimeCarousel({ title, description, animeList, routeParam, skeletonCount = 5, priority = false }: { title: string; description: string; animeList: AnimeCardData[]; routeParam: string; skeletonCount?: number; priority?: boolean }) {
   return (
     <section className="mt-16 relative">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
@@ -38,14 +38,22 @@ function CategoryRowView({ title, description, animeList, routeParam }: { title:
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-        {animeList.length > 0 ? (
-          animeList.map((anime, index) => (
-            <AnimeCard key={anime.slug} anime={anime} index={index} priority={false} />
-          ))
-        ) : (
-          Array.from({ length: 5 }).map((_, i) => <AnimeSkeleton key={i} />)
-        )}
+      <div className="-mx-6 overflow-x-auto px-6 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex snap-x snap-mandatory gap-4 md:gap-6">
+          {animeList.length > 0 ? (
+            animeList.map((anime, index) => (
+              <div key={anime.slug} className="w-[46%] shrink-0 snap-start sm:w-[30%] md:w-[22%] lg:w-[18%] xl:w-[16%]">
+                <AnimeCard anime={anime} index={index} priority={priority && index < 5} />
+              </div>
+            ))
+          ) : (
+            Array.from({ length: skeletonCount }).map((_, i) => (
+              <div key={i} className="w-[46%] shrink-0 snap-start sm:w-[30%] md:w-[22%] lg:w-[18%] xl:w-[16%]">
+                <AnimeSkeleton />
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </section>
   );
@@ -95,62 +103,41 @@ export default async function Home() {
           <div className="absolute right-0 sm:right-20 top-1/2 -translate-y-1/2 w-48 h-48 bg-indigo-600/20 blur-3xl rounded-full group-hover:bg-indigo-500/30 transition-colors" />
         </div>
 
-        <div className="mb-6 flex items-end justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-white tracking-tight mb-2">Update Ongoing Terbaru</h2>
-            <p className="text-sm text-zinc-400">Episode terbaru subtitle Indonesia, langsung dari katalog AniDow.</p>
-          </div>
-          <Link href="/browse?type=ongoing" className="shrink-0 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors bg-white/5 py-1 px-3 rounded-md border border-white/5">
-            <span className="hidden sm:inline">Lihat Ongoing</span> <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-          {latestAnime.length > 0 ? (
-            latestAnime.map((anime, index) => (
-              <AnimeCard key={anime.slug} anime={anime} index={index} priority={index < 5} />
-            ))
-          ) : (
-            Array.from({ length: 10 }).map((_, i) => <AnimeSkeleton key={i} />)
-          )}
-        </div>
       </section>
 
-      <CategoryRowView
+      <AnimeCarousel
+        title="Update Ongoing Terbaru"
+        description="Episode terbaru subtitle Indonesia, langsung dari katalog AniDow. Geser untuk melihat lebih banyak."
+        animeList={latestAnime}
+        routeParam="type=ongoing"
+        skeletonCount={10}
+        priority
+      />
+      <AnimeCarousel
         title="Aksi Menegangkan"
         description="Ledakan, pertarungan epik, dan kelangsungan hidup dengan adrenalin penuh."
         animeList={actionAnime}
         routeParam="genre=action"
       />
-      <CategoryRowView
+      <AnimeCarousel
         title="Komedi Segar"
         description="Tawa lepas pengusir penat dengan deret momen absurd yang memecah suasana."
         animeList={comedyAnime}
         routeParam="genre=comedy"
       />
-      <CategoryRowView
+      <AnimeCarousel
         title="Romansa Favorit"
         description="Kisah manis dua insan dan serbarnya bumbu drama yang menggetarkan hati."
         animeList={romanceAnime}
         routeParam="genre=romance"
       />
-
-      <section className="mt-16">
-        <div className="mb-6 flex items-end justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-white tracking-tight mb-2">Serial Complete</h2>
-            <p className="text-sm text-zinc-400">Pilihan tamat untuk maraton tanpa menunggu episode baru.</p>
-          </div>
-          <Link href="/browse?type=complete" className="shrink-0 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-indigo-400 hover:text-indigo-300 transition-colors bg-white/5 py-1 px-3 rounded-md border border-white/5">
-            <span className="hidden sm:inline">Lihat Complete</span> <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-          {completeAnime.map((anime, index) => (
-            <AnimeCard key={anime.slug} anime={anime} index={index} />
-          ))}
-        </div>
-      </section>
+      <AnimeCarousel
+        title="Serial Complete"
+        description="Pilihan tamat untuk maraton tanpa menunggu episode baru."
+        animeList={completeAnime}
+        routeParam="type=complete"
+        skeletonCount={10}
+      />
 
     </div>
   );
