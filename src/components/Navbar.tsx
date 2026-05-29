@@ -20,7 +20,6 @@ export default function Navbar() {
   const [isFocused, setIsFocused] = useState(false);
   const [search, setSearch] = useState(q);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
-  const timeoutRef = useRef<NodeJS.Timeout>(null);
   const suggestionTimeoutRef = useRef<NodeJS.Timeout>(null);
 
   // Sinkronisasi teks pencarian saat user berpindah halaman melalui link
@@ -54,7 +53,7 @@ export default function Navbar() {
           setSuggestions([]);
         }
       }
-    }, 250);
+    }, 120);
 
     return () => {
       controller.abort();
@@ -65,20 +64,15 @@ export default function Navbar() {
   }, [search]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setSearch(val);
+    setSearch(e.target.value);
+  };
 
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      if (val) {
-        router.push(`/search?q=${encodeURIComponent(val)}`);
-      } else {
-        router.push('/');
-      }
-    }, 500);
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const query = search.trim();
+    setIsFocused(false);
+    setSuggestions([]);
+    router.push(query ? `/search?q=${encodeURIComponent(query)}` : "/");
   };
 
   const handleSuggestionClick = () => {
@@ -115,7 +109,8 @@ export default function Navbar() {
         {/* Dynamic Search Bar & Shortcuts */}
         <div className="flex items-center w-full ml-4 sm:ml-0 sm:w-auto">
           <div className="relative w-full sm:w-80 md:w-96">
-            <motion.div 
+            <motion.form
+              onSubmit={handleSearchSubmit}
               animate={{ 
                 boxShadow: isFocused ? "0 0 0 1px rgba(99,102,241,0.5)" : "0 0 0 0px rgba(99,102,241,0)"
               }}
@@ -123,7 +118,7 @@ export default function Navbar() {
             >
               <Search className="w-4 h-4 text-zinc-400 mr-2 shrink-0" />
               <input 
-                type="text"
+                type="search"
                 placeholder="Cari anime..."
                 value={search}
                 onChange={handleSearchChange}
@@ -131,7 +126,7 @@ export default function Navbar() {
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 150)}
               />
-            </motion.div>
+            </motion.form>
 
             {isFocused && suggestions.length > 0 && (
               <div className="absolute left-0 right-0 top-full mt-2 overflow-hidden rounded-xl border border-white/10 bg-zinc-950/95 shadow-2xl backdrop-blur-xl">
