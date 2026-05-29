@@ -30,7 +30,7 @@ export default function AnimeCarousel({ title, description, animeList, routePara
   };
 
   return (
-    <section className="mt-16 relative group/carousel">
+    <section className="mt-10 relative group/carousel">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white tracking-tight mb-2 flex items-center gap-2">
@@ -49,7 +49,7 @@ export default function AnimeCarousel({ title, description, animeList, routePara
           type="button"
           aria-label={`Geser ${title} ke kiri`}
           onClick={() => scroll("left")}
-          className="absolute left-0 top-1/2 z-30 hidden h-12 w-12 -translate-x-3 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-zinc-950/80 text-white opacity-0 shadow-2xl backdrop-blur-xl transition-all hover:border-indigo-400/50 hover:bg-indigo-600 md:flex md:group-hover/carousel:opacity-100"
+          className="absolute left-0 top-1/2 z-30 hidden h-11 w-11 -translate-x-2 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-zinc-950/70 text-white/80 shadow-2xl backdrop-blur-xl transition-all hover:border-indigo-400/50 hover:bg-indigo-600 hover:text-white md:flex"
         >
           <ChevronLeft className="h-6 w-6" />
         </button>
@@ -57,10 +57,13 @@ export default function AnimeCarousel({ title, description, animeList, routePara
           type="button"
           aria-label={`Geser ${title} ke kanan`}
           onClick={() => scroll("right")}
-          className="absolute right-0 top-1/2 z-30 hidden h-12 w-12 -translate-y-1/2 translate-x-3 items-center justify-center rounded-full border border-white/10 bg-zinc-950/80 text-white opacity-0 shadow-2xl backdrop-blur-xl transition-all hover:border-indigo-400/50 hover:bg-indigo-600 md:flex md:group-hover/carousel:opacity-100"
+          className="absolute right-0 top-1/2 z-30 hidden h-11 w-11 -translate-y-1/2 translate-x-2 items-center justify-center rounded-full border border-white/10 bg-zinc-950/70 text-white/80 shadow-2xl backdrop-blur-xl transition-all hover:border-indigo-400/50 hover:bg-indigo-600 hover:text-white md:flex"
         >
           <ChevronRight className="h-6 w-6" />
         </button>
+
+        <div className="pointer-events-none absolute left-0 top-0 z-20 hidden h-full w-16 bg-gradient-to-r from-[#050505] to-transparent md:block" />
+        <div className="pointer-events-none absolute right-0 top-0 z-20 hidden h-full w-16 bg-gradient-to-l from-[#050505] to-transparent md:block" />
 
         <div ref={scrollRef} className="-mx-6 overflow-x-auto scroll-smooth px-6 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <div className="flex snap-x snap-mandatory gap-4 md:gap-6">

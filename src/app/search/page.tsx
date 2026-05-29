@@ -1,7 +1,6 @@
-import { searchAnimeTitles } from "@/lib/anime-api";
+import AnimeCard from "@/components/AnimeCard";
+import { searchAnimeTitles, toAnimeCardData } from "@/lib/anime-api";
 import { SearchAnimeItem } from "@/types/anime-api";
-import { Clapperboard } from "lucide-react";
-import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -37,32 +36,9 @@ export default async function SearchPage({
       </div>
 
       {results.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
           {results.map((item, index) => (
-            <Link
-              key={`${item.slug}-${index}`}
-              href={`/anime/${item.slug}`}
-              className="glass-card group flex items-center gap-4 rounded-2xl p-4 border border-white/5 hover:border-indigo-500/40 transition-colors"
-            >
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                <Clapperboard className="h-6 w-6" />
-              </div>
-              <div className="min-w-0">
-                <div className="mb-2">
-                  <span className="rounded-md bg-zinc-800/80 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                    Anime
-                  </span>
-                </div>
-                <h2 className="truncate font-bold text-zinc-100 group-hover:text-indigo-300 transition-colors">
-                  {item.title}
-                </h2>
-                {(item.status || item.totalEpisodes || item.episodes) && (
-                  <p className="mt-1 truncate text-xs text-zinc-500">
-                    {[item.status, item.totalEpisodes || item.episodes].filter(Boolean).join(" • ")}
-                  </p>
-                )}
-              </div>
-            </Link>
+            <AnimeCard key={`${item.slug}-${index}`} anime={toAnimeCardData(item)} index={index} priority={index < 8} />
           ))}
         </div>
       ) : (
