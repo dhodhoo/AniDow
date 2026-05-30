@@ -1,6 +1,5 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
 import { GripHorizontal, FastForward } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useHistory } from "@/hooks/useHistory";
@@ -31,25 +30,20 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
 
   return (
     <>
-      <AnimatePresence>
-        {lightsOut && (
-          <motion.div 
-             initial={{ opacity: 0 }}
-             animate={{ opacity: 1 }}
-             exit={{ opacity: 0 }}
-             transition={{ duration: 0.8, ease: "easeInOut" }}
-             className="fixed inset-0 bg-[#050505]/95 z-40 backdrop-blur-[2px]"
-             onClick={() => setLightsOut(false)}
-          />
-        )}
-      </AnimatePresence>
+      {/* Lights Out CSS-based Overlay */}
+      <div
+         className={`fixed inset-0 bg-[#050505]/95 z-40 backdrop-blur-[2px] transition-opacity duration-700 ease-in-out ${
+           lightsOut ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+         }`}
+         onClick={() => setLightsOut(false)}
+      />
 
       <div className={`relative w-full ${lightsOut ? "z-50 ring-1 ring-white/10" : "z-10"} transition-all duration-700`}>
         {/* Floating Player Frame */}
         <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 glass-card bg-black flex flex-col relative group">
-          
+
           {/* IFrame Embedded Control */}
-          <iframe 
+          <iframe
              src={activeEmbedUrl}
              className="w-full h-full border-none z-0 relative"
              allowFullScreen
@@ -74,7 +68,7 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
                  </button>
                </Link>
              )}
-             <button 
+             <button
                 onClick={() => setLightsOut(!lightsOut)}
                 className={`flex items-center gap-1.5 lg:gap-2 backdrop-blur-md px-3 lg:px-4 py-2 rounded-xl text-[10px] lg:text-xs font-bold transition-all border shadow-xl ${lightsOut ? "bg-indigo-600/90 hover:bg-indigo-500 border-indigo-400/50 text-white" : "bg-zinc-900/80 hover:bg-zinc-800 border-white/10 text-zinc-300"}`}
              >

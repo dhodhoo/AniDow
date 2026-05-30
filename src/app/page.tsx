@@ -75,7 +75,6 @@ export default async function Home() {
         animeList={latestAnime}
         routeParam="type=ongoing"
         skeletonCount={10}
-        priority
       />
       <AnimeCarousel
         title="Aksi Menegangkan"

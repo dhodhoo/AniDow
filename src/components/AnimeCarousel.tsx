@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import AnimeCard from "@/components/AnimeCard";
 import AnimeSkeleton from "@/components/AnimeSkeleton";
 import { AnimeCardData } from "@/types/anime-api";
@@ -18,6 +18,30 @@ interface AnimeCarouselProps {
 
 export default function AnimeCarousel({ title, description, animeList, routeParam, skeletonCount = 5, priority = false }: AnimeCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [showLeftFade, setShowLeftFade] = useState(false);
+  const [showRightFade, setShowRightFade] = useState(true);
+
+  const handleScroll = () => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+
+    // Show left fade if user has scrolled to the right (threshold: 5px)
+    setShowLeftFade(scrollLeft > 5);
+
+    // Show right fade if there is more content to scroll to the right (threshold: 5px)
+    setShowRightFade(scrollLeft + clientWidth < scrollWidth - 5);
+  };
+
+  useEffect(() => {
+    // Initial check on mount or when the list updates
+    handleScroll();
+
+    // Listen to window resizing to update scroll bounds
+    window.addEventListener("resize", handleScroll);
+    return () => window.removeEventListener("resize", handleScroll);
+  }, [animeList]);
 
   const scroll = (direction: "left" | "right") => {
     const container = scrollRef.current;
@@ -62,10 +86,15 @@ export default function AnimeCarousel({ title, description, animeList, routePara
           <ChevronRight className="h-6 w-6" />
         </button>
 
-        <div className="pointer-events-none absolute left-0 top-0 z-20 hidden h-full w-16 bg-gradient-to-r from-[#050505] to-transparent md:block" />
-        <div className="pointer-events-none absolute right-0 top-0 z-20 hidden h-full w-16 bg-gradient-to-l from-[#050505] to-transparent md:block" />
+        {/* Dynamic Opacity Scroll Fades */}
+        <div className={`pointer-events-none absolute left-0 top-0 z-20 hidden h-full w-16 bg-gradient-to-r from-[#050505] to-transparent md:block transition-opacity duration-300 ${showLeftFade ? "opacity-100" : "opacity-0"}`} />
+        <div className={`pointer-events-none absolute right-0 top-0 z-20 hidden h-full w-16 bg-gradient-to-l from-[#050505] to-transparent md:block transition-opacity duration-300 ${showRightFade ? "opacity-100" : "opacity-0"}`} />
 
-        <div ref={scrollRef} className="overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           <div className="flex snap-x snap-mandatory gap-4 md:gap-6">
             {animeList.length > 0 ? (
               animeList.map((anime, index) => (

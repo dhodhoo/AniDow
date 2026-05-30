@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { Search, Bookmark, LayoutGrid } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
@@ -107,20 +106,11 @@ export default function Navbar() {
   };
 
   return (
-    <motion.nav 
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ ease: "easeOut", duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-50 px-3 py-3 sm:px-6 sm:py-4"
-    >
+    <nav className="fixed top-0 left-0 right-0 z-50 px-3 py-3 sm:px-6 sm:py-4 animate-slide-down">
       <div className="max-w-7xl mx-auto flex items-center justify-between glass-card rounded-2xl px-3 py-2.5 sm:px-6 sm:py-3">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <motion.div
-            whileHover={{ scale: 1.05, rotate: 5 }}
-            className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-white/95 flex items-center justify-center border border-indigo-300/60 shadow-[0_0_18px_rgba(168,85,247,0.35)] transition-all shrink-0"
-
-          >
+          <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-white/95 flex items-center justify-center border border-indigo-300/60 shadow-[0_0_18px_rgba(168,85,247,0.35)] transition-all duration-300 hover:scale-105 hover:rotate-5 shrink-0">
             <Image
               src="/logo.png"
               alt="AniDow logo"
@@ -129,7 +119,7 @@ export default function Navbar() {
               priority
               className="object-cover"
             />
-          </motion.div>
+          </div>
           <span className="font-bold text-xl tracking-tight text-white hover:text-indigo-400 transition-colors hidden sm:block">
             AniDow
           </span>
@@ -138,12 +128,11 @@ export default function Navbar() {
         {/* Dynamic Search Bar & Shortcuts */}
         <div className="flex items-center w-full ml-3 sm:ml-0 sm:w-auto">
           <div className="relative w-full sm:w-80 md:w-96">
-            <motion.form
+            <form
               onSubmit={handleSearchSubmit}
-              animate={{ 
-                boxShadow: isFocused ? "0 0 0 1px rgba(99,102,241,0.5)" : "0 0 0 0px rgba(99,102,241,0)"
-              }}
-              className="flex items-center bg-zinc-900/50 rounded-xl px-3 py-2 sm:px-4 border border-zinc-700/50 transition-colors hover:border-zinc-600/50"
+              className={`flex items-center bg-zinc-900/50 rounded-xl px-3 py-2 sm:px-4 border transition-all duration-300 ${
+                isFocused ? "border-indigo-500/50 shadow-[0_0_0_1px_rgba(99,102,241,0.5)]" : "border-zinc-700/50 hover:border-zinc-600/50"
+              }`}
             >
               <Search className="w-4 h-4 text-zinc-400 mr-2 shrink-0" />
               <input
@@ -157,7 +146,7 @@ export default function Navbar() {
                 }}
                 onBlur={() => setTimeout(() => setIsFocused(false), 150)}
               />
-            </motion.form>
+            </form>
 
             {isFocused && suggestions.length > 0 && (
               <div className="absolute left-0 right-0 top-full mt-2 max-h-[60vh] overflow-y-auto rounded-xl border border-white/10 bg-zinc-950/95 shadow-2xl backdrop-blur-xl">
@@ -195,6 +184,6 @@ export default function Navbar() {
         </div>
 
       </div>
-    </motion.nav>
+    </nav>
   );
 }
