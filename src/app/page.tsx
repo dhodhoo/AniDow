@@ -1,9 +1,11 @@
 import Hero from "@/components/Hero";
-import AnimeCarousel from "@/components/AnimeCarousel";
 import { getGenre, getHome, isAnimeApiConfigured, toAnimeCardData } from "@/lib/anime-api";
 import { HomeAnimeItem } from "@/types/anime-api";
 import Link from "next/link";
 import { LayoutGrid } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const AnimeCarousel = dynamic(() => import("@/components/AnimeCarousel"));
 
 export const revalidate = 600;
 

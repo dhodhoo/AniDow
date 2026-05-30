@@ -1,10 +1,13 @@
 import { getAnime, getEpisode } from "@/lib/anime-api";
-import VideoPlayer from "@/components/VideoPlayer";
-import EpisodeList from "@/components/EpisodeList";
 import { Download, ExternalLink, Star } from "lucide-react";
 import type { Metadata } from "next";
 import type { AnimeResponse, DownloadGroup, EpisodeResponse } from "@/types/anime-api";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+const VideoPlayer = dynamic(() => import("@/components/VideoPlayer"));
+
+const EpisodeList = dynamic(() => import("@/components/EpisodeList"));
 
 function slugFromUrl(url: string | null) {
   return url?.split("/").filter(Boolean).pop() || null;

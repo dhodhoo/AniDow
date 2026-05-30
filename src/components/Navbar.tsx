@@ -5,6 +5,8 @@ import { Search, Bookmark, LayoutGrid } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
+import { useDebounce } from "@/hooks/useDebounce";
 
 interface SearchSuggestion {
   title: string;
@@ -22,6 +24,8 @@ export default function Navbar() {
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
   const suggestionCacheRef = useRef(new Map<string, SearchSuggestion[]>());
+
+  const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
     if (isFocused) return;
@@ -44,14 +48,14 @@ export default function Navbar() {
     abortControllerRef.current?.abort();
 
     if (!query) {
-      setSuggestions([]);
+      Promise.resolve().then(() => setSuggestions([]));
       return;
     }
 
     const cacheKey = query.toLowerCase();
     const cachedSuggestions = suggestionCacheRef.current.get(cacheKey);
     if (cachedSuggestions) {
-      setSuggestions(cachedSuggestions);
+      Promise.resolve().then(() => setSuggestions(cachedSuggestions));
       return;
     }
 
@@ -76,11 +80,17 @@ export default function Navbar() {
     }
   };
 
+  useEffect(() => {
+    if (isFocused) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadSuggestions(debouncedSearch);
+    }
+  }, [debouncedSearch, isFocused]);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearch(value);
     setIsFocused(true);
-    loadSuggestions(value);
   };
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -106,16 +116,18 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between glass-card rounded-2xl px-3 py-2.5 sm:px-6 sm:py-3">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <motion.div 
+          <motion.div
             whileHover={{ scale: 1.05, rotate: 5 }}
             className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-white/95 flex items-center justify-center border border-indigo-300/60 shadow-[0_0_18px_rgba(168,85,247,0.35)] transition-all shrink-0"
 
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/logo.png"
               alt="AniDow logo"
-              className="h-full w-full object-cover"
+              fill
+              sizes="(max-width: 640px) 36px, 40px"
+              priority
+              className="object-cover"
             />
           </motion.div>
           <span className="font-bold text-xl tracking-tight text-white hover:text-indigo-400 transition-colors hidden sm:block">
@@ -134,7 +146,7 @@ export default function Navbar() {
               className="flex items-center bg-zinc-900/50 rounded-xl px-3 py-2 sm:px-4 border border-zinc-700/50 transition-colors hover:border-zinc-600/50"
             >
               <Search className="w-4 h-4 text-zinc-400 mr-2 shrink-0" />
-              <input 
+              <input
                 type="search"
                 placeholder="Cari anime..."
                 value={search}
@@ -142,7 +154,6 @@ export default function Navbar() {
                 className="bg-transparent border-none outline-none text-sm text-zinc-200 placeholder:text-zinc-500 w-full"
                 onFocus={() => {
                   setIsFocused(true);
-                  loadSuggestions(search);
                 }}
                 onBlur={() => setTimeout(() => setIsFocused(false), 150)}
               />

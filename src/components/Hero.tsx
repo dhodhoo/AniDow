@@ -14,10 +14,10 @@ export default function Hero({ anime }: HeroProps) {
   if (!anime) return null;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
       className="relative w-full h-[320px] sm:h-[400px] md:h-[500px] mb-8 sm:mb-12 rounded-3xl overflow-hidden glass-card group"
     >
       {/* Background Image Overlay */}
@@ -29,7 +29,6 @@ export default function Hero({ anime }: HeroProps) {
           priority // Highest priority for rendering Above the fold LCP component
           sizes="100vw"
           className="object-cover opacity-40 group-hover:scale-105 transition-transform duration-1000 ease-out"
-          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/40 to-transparent" />

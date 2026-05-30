@@ -3,9 +3,11 @@ import Link from "next/link";
 import { Calendar, Clock, Clapperboard, Star, Tv } from "lucide-react";
 import { animeDetailToCard, getAnime, getFirstEpisode } from "@/lib/anime-api";
 import { AnimeResponse } from "@/types/anime-api";
-import WatchlistButton from "@/components/WatchlistButton";
-import PlayNowButton from "@/components/PlayNowButton";
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
+
+const WatchlistButton = dynamic(() => import("@/components/WatchlistButton"));
+const PlayNowButton = dynamic(() => import("@/components/PlayNowButton"));
 
 export const revalidate = 3600;
 
@@ -70,7 +72,6 @@ export default async function AnimeDetail({
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
               priority
-              unoptimized
             />
           )}
         </div>
