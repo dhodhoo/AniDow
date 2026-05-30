@@ -32,7 +32,7 @@ export default function EpisodeList({ episodes, currentEpisodeSlug }: EpisodeLis
           {episodes.map((ep, i) => {
             const isActive = ep.slug === currentEpisodeSlug;
             return (
-              <Link key={ep.slug} href={`/watch/${ep.slug}`} scroll={false}>
+              <Link key={ep.slug} href={`/watch/${ep.slug}`} scroll={false} prefetch={false}>
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}

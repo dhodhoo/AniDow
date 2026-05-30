@@ -26,17 +26,17 @@ export default function AnimeCard({ anime, index, priority = false }: AnimeCardP
 
   return (
 
-    <Link href={`/anime/${anime.slug}`}>
+    <Link href={`/anime/${anime.slug}`} prefetch={false}>
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ 
-          duration: 0.6, 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{
+          duration: 0.4,
           ease: "easeOut",
-          delay: Math.min(index * 0.05, 0.5) // Cap maximum stagger delay to feel extremely responsive
+          delay: Math.min(index * 0.03, 0.3) // Cap maximum stagger delay to feel extremely responsive
         }}
-        whileHover={{ 
-          y: -10, 
+        whileHover={{
+          y: -10,
           scale: 1.02,
           transition: { duration: 0.3, ease: "easeOut" }
         }}
