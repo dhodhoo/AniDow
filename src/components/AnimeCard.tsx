@@ -21,7 +21,7 @@ export default function AnimeCard({ anime, index, priority = false }: AnimeCardP
       : anime.episodes
         ? `${anime.episodes} EPS`
         : null;
-  const statusLabel = anime.currentEpisode || anime.day ? "Ongoing" : anime.totalEpisodes || anime.episodes ? "Complete" : null;
+  const statusLabel = anime.status ?? null;
 
   return (
     <Link href={`/anime/${anime.slug}`} prefetch={false}>

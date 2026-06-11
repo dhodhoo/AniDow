@@ -107,14 +107,26 @@ export const getAnime = (slug: string) => animeApi<AnimeResponse>(`/api/anime/${
 export const getEpisode = (slug: string, skipMirrors = false) => animeApi<EpisodeResponse>(`/api/episode/${slug}`, { params: { skipMirrors: skipMirrors ? 1 : undefined }, revalidate: 600 });
 
 export function toAnimeCardData(item: HomeAnimeItem | GenreCardItem | SearchAnimeItem): AnimeCardData {
+  // HomeAnimeItem & SearchAnimeItem punya currentEpisode/day/totalEpisodes/status
+  // GenreCardItem tidak punya field status sama sekali → null (tanpa badge)
+  const isHomeOrSearch = "currentEpisode" in item;
+  const currentEpisode = "currentEpisode" in item ? item.currentEpisode : null;
+  const day = "day" in item ? item.day : null;
+  const totalEpisodes = "totalEpisodes" in item ? item.totalEpisodes : null;
+  const rawStatus = "status" in item ? item.status : null;
+
+  const status = rawStatus
+    || (isHomeOrSearch && (currentEpisode || day) ? "Ongoing" : null)
+    || (isHomeOrSearch && totalEpisodes ? "Complete" : null);
+
   return {
     title: item.title,
     slug: item.slug,
     image: item.image,
     date: "date" in item ? item.date : null,
-    currentEpisode: "currentEpisode" in item ? item.currentEpisode : null,
-    day: "day" in item ? item.day : null,
-    totalEpisodes: "totalEpisodes" in item ? item.totalEpisodes : null,
+    currentEpisode,
+    day,
+    totalEpisodes,
     score: "score" in item ? item.score : null,
     rating: "rating" in item ? item.rating : null,
     episodes: "episodes" in item ? item.episodes : null,
@@ -122,6 +134,7 @@ export function toAnimeCardData(item: HomeAnimeItem | GenreCardItem | SearchAnim
     genres: "genres" in item ? item.genres : undefined,
     season: "season" in item ? item.season : null,
     synopsis: "synopsis" in item ? item.synopsis : null,
+    status,
   };
 }
 

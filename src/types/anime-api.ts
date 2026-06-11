@@ -54,6 +54,9 @@ export interface AnimeCardData {
   genres?: string[];
   season?: string | null;
   synopsis?: string | null;
+  // Status eksplisit — "Ongoing" | "Complete".
+  // GenreCardItem tidak punya info status → null (tampil tanpa badge)
+  status?: string | null;
 }
 
 export interface HomeSection {
