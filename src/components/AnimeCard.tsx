@@ -14,13 +14,22 @@ interface AnimeCardProps {
 
 export default function AnimeCard({ anime, index, priority = false }: AnimeCardProps) {
   const score = anime.score || anime.rating;
-  const episodeLabel = anime.currentEpisode
-    ? `EP ${anime.currentEpisode}`
-    : anime.totalEpisodes
-      ? `${anime.totalEpisodes} EPS`
-      : anime.episodes
-        ? `${anime.episodes} EPS`
-        : null;
+
+  // Bersihkan nilai dari API yang mungkin sudah punya suffix "Eps"/"Ep"
+  const cleanNum = (val: string | null | undefined): string | null => {
+    if (!val) return null;
+    const stripped = val.replace(/\s*(Eps|Ep|Episode|EPS|EP)$/i, "").trim();
+    return stripped || null;
+  };
+
+  const episodeLabel =
+    anime.currentEpisode && anime.currentEpisode !== "Unknown"
+      ? `EP ${cleanNum(anime.currentEpisode) || anime.currentEpisode}`
+      : anime.totalEpisodes
+        ? `${cleanNum(anime.totalEpisodes) || anime.totalEpisodes} EPS`
+        : anime.episodes
+          ? `${cleanNum(anime.episodes) || anime.episodes} EPS`
+          : null;
   const statusLabel = anime.status ?? null;
 
   return (
@@ -63,7 +72,7 @@ export default function AnimeCard({ anime, index, priority = false }: AnimeCardP
             )}
           </div>
           {score && (
-            <div className="absolute bottom-3 right-3 md:top-3 md:bottom-auto z-20 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg flex items-center gap-1 border border-white/10 shadow-lg">
+            <div className="absolute top-3 right-3 z-20 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg flex items-center gap-1 border border-white/10 shadow-lg">
               <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
               <span className="text-xs font-bold text-white">{score}</span>
             </div>
