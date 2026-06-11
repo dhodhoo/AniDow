@@ -126,7 +126,6 @@ export default async function MovieDetailPage({
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
               priority
-              unoptimized
             />
           )}
         </div>

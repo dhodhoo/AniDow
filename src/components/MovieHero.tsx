@@ -37,7 +37,6 @@ export default function MovieHero({ banners }: MovieHeroProps) {
           priority
           sizes="100vw"
           className="object-cover opacity-50 group-hover:scale-105 transition-transform duration-1000 ease-out animate-fade-in"
-          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/40 to-transparent" />

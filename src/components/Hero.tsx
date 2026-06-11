@@ -23,7 +23,6 @@ export default function Hero({ anime }: HeroProps) {
           priority // Highest priority for rendering Above the fold LCP component
           sizes="100vw"
           className="object-cover opacity-40 group-hover:scale-105 transition-transform duration-1000 ease-out"
-          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/40 to-transparent" />

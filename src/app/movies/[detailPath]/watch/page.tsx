@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
+import dynamicImport from "next/dynamic";
 
-import MoviePlayer from "@/components/MoviePlayer";
 import {
   absolutizeFiles,
   getMovieDetails,
@@ -10,6 +10,11 @@ import {
   getSeriesEpisodes,
   getSeriesFiles,
 } from "@/lib/movie-api";
+
+const MoviePlayer = dynamicImport(
+  () => import("@/components/MoviePlayer"),
+  { loading: () => <div className="aspect-video w-full animate-pulse rounded-2xl bg-zinc-900" /> }
+);
 import type {
   MovieDetailsResponse,
   MovieFilesResponse,

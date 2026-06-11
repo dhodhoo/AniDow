@@ -40,9 +40,8 @@ export default function ContinueWatchingSection() {
                           src={entry.cover}
                           alt={entry.title}
                           fill
-                          sizes="(max-width: 768px) 65vw, 24vw"
+                          sizes="(max-width: 640px) 65vw, (max-width: 768px) 42vw, (max-width: 1024px) 30vw, 24vw"
                           className="object-cover transition-transform duration-700 group-hover:scale-105"
-                          unoptimized
                         />
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />

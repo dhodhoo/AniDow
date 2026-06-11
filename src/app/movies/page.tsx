@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 
 import MovieCarousel from "@/components/MovieCarousel";
 import MovieHero from "@/components/MovieHero";
-import ContinueWatchingSection from "@/components/ContinueWatchingSection";
 import {
   getMovieHome,
   getPopular,
@@ -10,6 +10,10 @@ import {
   isMovieApiConfigured,
   toMovieCardData,
 } from "@/lib/movie-api";
+
+const ContinueWatchingSection = dynamic(
+  () => import("@/components/ContinueWatchingSection")
+);
 import type { MovieHomeResponse, MoviePaginatedResponse, MoviePopularResponse, MovieSlimItem } from "@/types/movie-api";
 
 export const revalidate = 600;

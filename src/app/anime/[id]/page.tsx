@@ -72,7 +72,6 @@ export default async function AnimeDetail({
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
               priority
-              unoptimized
             />
           )}
         </div>
