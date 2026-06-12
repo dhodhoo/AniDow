@@ -44,13 +44,67 @@ function isExpiringSoon(url: string, thresholdMs = 30 * 60 * 1000) {
   return exp > 0 && exp - Date.now() < thresholdMs;
 }
 
+// Coba decode buffer dengan encoding tertentu, hitung karakter rusak
+function decodeBuffer(buffer: ArrayBuffer, charset: string): string {
+  try {
+    return new TextDecoder(charset, { fatal: false }).decode(buffer);
+  } catch {
+    return "";
+  }
+}
+
+function countReplacementChars(text: string): number {
+  let count = 0;
+  for (let i = 0; i < text.length; i++) {
+    if (text.charCodeAt(i) === 0xfffd) count++;
+  }
+  return count;
+}
+
 // Konversi SRT ke WebVTT (browser hanya terima VTT di <track>)
+// Deteksi encoding upstream: UTF-8 → Windows-1252 → ISO-8859-1 → GBK
 async function srtToVttBlobUrl(srtUrl: string): Promise<string> {
   const res = await fetch(srtUrl);
   if (!res.ok) throw new Error(`Subtitle HTTP ${res.status}`);
-  const srt = await res.text();
-  const vtt = "WEBVTT\n\n" + srt.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, "$1.$2");
-  return URL.createObjectURL(new Blob([vtt], { type: "text/vtt" }));
+
+  const buffer = await res.arrayBuffer();
+
+  // Cek Content-Type untuk petunjuk charset
+  let charset = "utf-8";
+  const contentType = res.headers.get("content-type");
+  if (contentType) {
+    const match = contentType.match(/charset=([^\s;]+)/i);
+    if (match) charset = match[1].toLowerCase().replace(/^"|"$/g, "");
+  }
+
+  // Coba encoding dari header dulu, lalu fallback
+  const candidates = [charset, "utf-8", "windows-1252", "iso-8859-1", "gbk"];
+  const seen = new Set<string>();
+
+  let bestText = "";
+  let bestErrors = Infinity;
+
+  for (const enc of candidates) {
+    const normalized = enc.toLowerCase();
+    if (seen.has(normalized)) continue;
+    seen.add(normalized);
+
+    const text = decodeBuffer(buffer, normalized);
+    if (!text) continue;
+
+    const errors = countReplacementChars(text);
+    if (errors < bestErrors) {
+      bestText = text;
+      bestErrors = errors;
+    }
+    if (errors === 0) break;
+  }
+
+  const vtt =
+    "WEBVTT\n\n" + bestText.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, "$1.$2");
+  return URL.createObjectURL(
+    new Blob([vtt], { type: "text/vtt;charset=utf-8" })
+  );
 }
 
 export default function MoviePlayer({
@@ -73,6 +127,7 @@ export default function MoviePlayer({
   const [activeResolution, setActiveResolution] = useState(initialFiles.downloads[0]?.resolution ?? 0);
   const [subtitleTracks, setSubtitleTracks] = useState<SubtitleTrack[]>([]);
   const [activeSubtitle, setActiveSubtitle] = useState<string | null>(null);
+  const [sourceVersion, setSourceVersion] = useState(0);  // paksa React re-render <track>
   const [refreshing, setRefreshing] = useState(false);
   const [fatalError, setFatalError] = useState<string | null>(null);
 
@@ -133,6 +188,7 @@ export default function MoviePlayer({
     if (!video) return;
 
     video.src = url;
+    setSourceVersion((v) => v + 1);  // paksa re-render <track>
     const restore = () => {
       if (position > 0) video.currentTime = position;
       if (shouldPlay) video.play().catch(() => {});
@@ -269,7 +325,7 @@ export default function MoviePlayer({
             .filter((track) => track.lan === activeSubtitle)
             .map((track) => (
               <track
-                key={track.lan}
+                key={`${track.lan}-v${sourceVersion}`}
                 kind="subtitles"
                 label={track.label}
                 srcLang={track.lan}
