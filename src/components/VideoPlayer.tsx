@@ -108,7 +108,7 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
   const handleMirrorClick = async (mirror: Mirror) => {
     const key = `${mirror.quality}-${mirror.mirrorIndex}`;
     // Kalau sudah resolved, langsung pilih
-    if (mirror.iframeUrl !== undefined && mirror.resolved !== false) {
+    if (mirror.iframeUrl) {
       setSelectedMirror(key);
       return;
     }
@@ -205,17 +205,18 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
             >
               Default
             </button>
-            {allMirrors.map((mirror) => {
-              const key = `${mirror.quality}-${mirror.mirrorIndex}`;
-              const isResolving = resolvingMirror === key;
-              const isUnresolved = mirror.resolved === false && !mirror.iframeUrl;
+            {allMirrors.map((mirror, idx) => {
+              // Key unik: gunakan index karena quality+mirrorIndex bisa duplikat
+              const key = `${mirror.quality}-${mirror.mirrorIndex}-${idx}`;
+              const isResolving = resolvingMirror === `${mirror.quality}-${mirror.mirrorIndex}`;
+              const isUnresolved = !mirror.iframeUrl;
               return (
                 <button
                   key={key}
                   onClick={() => handleMirrorClick(mirror)}
                   disabled={isResolving}
                   className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${
-                    selectedMirror === key
+                    selectedMirror === `${mirror.quality}-${mirror.mirrorIndex}`
                       ? "border-indigo-400 bg-indigo-600 text-white"
                       : isUnresolved
                       ? "border-white/5 bg-zinc-900/40 text-zinc-600 hover:text-zinc-300 hover:border-white/10"
