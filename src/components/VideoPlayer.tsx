@@ -88,15 +88,50 @@ interface VideoPlayerProps {
   nextEpisodeSlug?: string | null;
 }
 
-export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel, animeSlug, mirrors, nextEpisodeSlug }: VideoPlayerProps) {
+export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel, animeSlug, mirrors: initialMirrors, nextEpisodeSlug }: VideoPlayerProps) {
   const [lightsOut, setLightsOut] = useState(false);
   const [selectedMirror, setSelectedMirror] = useState("default");
+  const [mirrors, setMirrors] = useState<Mirror[]>(initialMirrors);
+  const [resolvingMirror, setResolvingMirror] = useState<string | null>(null);
   const { saveHistory } = useHistory();
+
+  // Semua mirror — yang sudah resolve + yang belum
+  const allMirrors = mirrors;
+  // Hanya yang sudah punya iframeUrl (playable)
   const playableMirrors = mirrors.filter((mirror) => mirror.iframeUrl);
   const activeMirror = playableMirrors.find((mirror) => `${mirror.quality}-${mirror.mirrorIndex}` === selectedMirror);
   const rawEmbedUrl = activeMirror?.iframeUrl || embedUrl;
   const activeEmbedUrl = useMemo(() => isValidIframeUrl(rawEmbedUrl) ? rawEmbedUrl : null, [rawEmbedUrl]);
   const iframeValid = activeEmbedUrl !== null;
+
+  // Lazy resolve mirror yang belum di-resolve saat diklik
+  const handleMirrorClick = async (mirror: Mirror) => {
+    const key = `${mirror.quality}-${mirror.mirrorIndex}`;
+    // Kalau sudah resolved, langsung pilih
+    if (mirror.iframeUrl !== undefined && mirror.resolved !== false) {
+      setSelectedMirror(key);
+      return;
+    }
+    // Belum resolve — fetch on-demand
+    setResolvingMirror(key);
+    try {
+      const res = await fetch(`/api/anime-proxy/mirror/${episodeSlug}/${mirror.mirrorIndex}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json() as { data: Mirror };
+      const resolved = json.data;
+      setMirrors((prev) =>
+        prev.map((m) =>
+          m.mirrorIndex === mirror.mirrorIndex ? { ...m, ...resolved } : m
+        )
+      );
+      setSelectedMirror(key);
+    } catch {
+      // Gagal resolve — tetap pilih mirror (akan tampil error di player)
+      setSelectedMirror(key);
+    } finally {
+      setResolvingMirror(null);
+    }
+  };
 
   useEffect(() => {
     saveHistory({ animeSlug, episodeSlug, episodeLabel, title });
@@ -161,7 +196,7 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
              </button>
           </div>
         </div>
-        {playableMirrors.length > 0 && (
+        {allMirrors.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedMirror("default")}
@@ -169,15 +204,24 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
             >
               Default
             </button>
-            {playableMirrors.map((mirror) => {
+            {allMirrors.map((mirror) => {
               const key = `${mirror.quality}-${mirror.mirrorIndex}`;
+              const isResolving = resolvingMirror === key;
+              const isUnresolved = mirror.resolved === false && !mirror.iframeUrl;
               return (
                 <button
                   key={key}
-                  onClick={() => setSelectedMirror(key)}
-                  className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${selectedMirror === key ? "border-indigo-400 bg-indigo-600 text-white" : "border-white/10 bg-zinc-900/70 text-zinc-400 hover:text-white"}`}
+                  onClick={() => handleMirrorClick(mirror)}
+                  disabled={isResolving}
+                  className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${
+                    selectedMirror === key
+                      ? "border-indigo-400 bg-indigo-600 text-white"
+                      : isUnresolved
+                      ? "border-white/5 bg-zinc-900/40 text-zinc-600 hover:text-zinc-300 hover:border-white/10"
+                      : "border-white/10 bg-zinc-900/70 text-zinc-400 hover:text-white"
+                  }`}
                 >
-                  {mirror.quality} {mirror.host ? `- ${mirror.host}` : ""}
+                  {isResolving ? "..." : `${mirror.quality}${mirror.host ? ` - ${mirror.host}` : ""}`}
                 </button>
               );
             })}
