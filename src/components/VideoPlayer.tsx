@@ -95,6 +95,9 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
   const [resolvingMirror, setResolvingMirror] = useState<string | null>(null);
   const { saveHistory } = useHistory();
 
+  // Key unik per mirror: gabungan quality + mirrorIndex + host
+  const mirrorKey = (m: Mirror) => `${m.quality}-${m.mirrorIndex}-${m.host ?? ""}`;
+
   // Semua mirror — yang sudah resolve + yang belum
   const allMirrors = mirrors;
   // Hanya yang sudah punya iframeUrl (playable)
@@ -105,8 +108,6 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
   const activeEmbedUrl = useMemo(() => isValidIframeUrl(rawEmbedUrl) ? rawEmbedUrl : null, [rawEmbedUrl]);
   const iframeValid = activeEmbedUrl !== null;
 
-  // Key unik per mirror: gabungan quality + mirrorIndex + host
-  const mirrorKey = (m: Mirror) => `${m.quality}-${m.mirrorIndex}-${m.host ?? ""}`;
 
   // Lazy resolve mirror yang belum di-resolve saat diklik
   const handleMirrorClick = async (mirror: Mirror) => {
