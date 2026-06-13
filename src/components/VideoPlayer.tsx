@@ -99,15 +99,18 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
   const allMirrors = mirrors;
   // Hanya yang sudah punya iframeUrl (playable)
   const playableMirrors = mirrors.filter((mirror) => mirror.iframeUrl);
-  // activeMirror: cari berdasarkan quality+mirrorIndex pada mirror yang sudah resolved
-  const activeMirror = mirrors.find((mirror) => mirror.iframeUrl && `${mirror.quality}-${mirror.mirrorIndex}` === selectedMirror);
+  // activeMirror: cari berdasarkan key unik (quality+mirrorIndex+host)
+  const activeMirror = mirrors.find((mirror) => mirror.iframeUrl && mirrorKey(mirror) === selectedMirror);
   const rawEmbedUrl = activeMirror?.iframeUrl || embedUrl;
   const activeEmbedUrl = useMemo(() => isValidIframeUrl(rawEmbedUrl) ? rawEmbedUrl : null, [rawEmbedUrl]);
   const iframeValid = activeEmbedUrl !== null;
 
+  // Key unik per mirror: gabungan quality + mirrorIndex + host
+  const mirrorKey = (m: Mirror) => `${m.quality}-${m.mirrorIndex}-${m.host ?? ""}`;
+
   // Lazy resolve mirror yang belum di-resolve saat diklik
   const handleMirrorClick = async (mirror: Mirror) => {
-    const key = `${mirror.quality}-${mirror.mirrorIndex}`;
+    const key = mirrorKey(mirror);
     // Kalau sudah resolved, langsung pilih
     if (mirror.iframeUrl) {
       setSelectedMirror(key);
@@ -121,17 +124,14 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json() as { data: Mirror };
       const resolved = json.data;
-      // Identifikasi mirror unik dengan quality + mirrorIndex (bukan mirrorIndex saja)
+      // Update mirror yang match quality + mirrorIndex + host
       setMirrors((prev) =>
         prev.map((m) =>
-          m.mirrorIndex === mirror.mirrorIndex && m.quality === mirror.quality
-            ? { ...m, ...resolved }
-            : m
+          mirrorKey(m) === key ? { ...m, ...resolved } : m
         )
       );
       setSelectedMirror(key);
     } catch {
-      // Gagal resolve — tetap pilih mirror (akan tampil error di player)
       setSelectedMirror(key);
     } finally {
       setResolvingMirror(null);
@@ -209,10 +209,9 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
             >
               Default
             </button>
-            {allMirrors.map((mirror, idx) => {
-              // Key unik: gunakan index karena quality+mirrorIndex bisa duplikat
-              const key = `${mirror.quality}-${mirror.mirrorIndex}-${idx}`;
-              const isResolving = resolvingMirror === `${mirror.quality}-${mirror.mirrorIndex}`;
+            {allMirrors.map((mirror) => {
+              const key = mirrorKey(mirror);
+              const isResolving = resolvingMirror === key;
               const isUnresolved = !mirror.iframeUrl;
               return (
                 <button
@@ -220,7 +219,7 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
                   onClick={() => handleMirrorClick(mirror)}
                   disabled={isResolving}
                   className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${
-                    selectedMirror === `${mirror.quality}-${mirror.mirrorIndex}`
+                    selectedMirror === key
                       ? "border-indigo-400 bg-indigo-600 text-white"
                       : isUnresolved
                       ? "border-white/5 bg-zinc-900/40 text-zinc-600 hover:text-zinc-300 hover:border-white/10"
