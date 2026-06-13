@@ -115,7 +115,8 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
     // Belum resolve — fetch on-demand
     setResolvingMirror(key);
     try {
-      const res = await fetch(`/api/anime-proxy/mirror/${episodeSlug}/${mirror.mirrorIndex}`);
+      const q = encodeURIComponent(mirror.quality ?? "");
+      const res = await fetch(`/api/anime-proxy/mirror/${episodeSlug}/${mirror.mirrorIndex}?q=${q}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json() as { data: Mirror };
       const resolved = json.data;
