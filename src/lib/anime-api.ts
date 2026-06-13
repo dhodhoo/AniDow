@@ -96,7 +96,10 @@ export async function animeApi<T>(path: string, options: ApiOptions = {}): Promi
 export const getHome = () => animeApi<HomeResponse>("/api/home", { revalidate: 600 });
 export const getOngoing = (page: number) => animeApi<ListResponse<HomeAnimeItem>>("/api/ongoing", { params: { page }, revalidate: 600 });
 export const getComplete = (page: number) => animeApi<ListResponse<HomeAnimeItem>>("/api/complete", { params: { page }, revalidate: 3600 });
-export const getAnimePage = (status: "ongoing" | "complete", page: number, limit = 24) => animeApi<ListResponse<SearchAnimeItem>>("/api/anime", { params: { status, page, limit }, revalidate: status === "complete" ? 3600 : 600 });
+export const getAnimePage = (status: "ongoing" | "complete", page: number, limit = 24) => {
+  const path = status === "complete" ? "/api/complete" : "/api/ongoing";
+  return animeApi<ListResponse<SearchAnimeItem>>(path, { params: { page, limit }, revalidate: status === "complete" ? 3600 : 600 });
+}
 export const getAnimeList = () => animeApi<AnimeListResponse>("/api/anime-list", { revalidate: 86400 });
 export const getGenres = () => animeApi<GenreListResponse>("/api/genres", { revalidate: 86400 });
 export const getGenre = (slug: string, page: number) => animeApi<ListResponse<GenreCardItem>>(`/api/genre/${slug}`, { params: { page }, revalidate: 1800 });
