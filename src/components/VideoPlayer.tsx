@@ -149,10 +149,11 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
                className="w-full h-full border-none z-0 relative"
                allowFullScreen
                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-               // Sandbox hanya untuk host yang tidak pakai iklan redirect
-               // Vidhide & sejenisnya tidak support sandbox (player tidak mau play)
+               // Sandbox: blokir popup iklan dengan menghapus allow-popups-to-escape-sandbox
+               // Vidhide tidak support sandbox sama sekali — skip
+               // Host lain (filedon, mega, dll): pakai sandbox tanpa allow-popups
                {...(!isAdRedirectHost(activeEmbedUrl!) && {
-                 sandbox: "allow-scripts allow-same-origin allow-presentation allow-popups allow-forms"
+                 sandbox: "allow-scripts allow-same-origin allow-presentation allow-forms"
                })}
                title={title}
             />
