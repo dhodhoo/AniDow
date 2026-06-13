@@ -51,6 +51,7 @@ export default function AnimeCard({ anime, index, priority = false }: AnimeCardP
               fill
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 18vw"
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+              unoptimized
               priority={priority}
             />
           ) : (
