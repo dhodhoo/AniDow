@@ -29,6 +29,7 @@ const ALLOWED_ENDPOINTS: { pattern: RegExp; paramNames: string[] }[] = [
   { pattern: /^search$/, paramNames: ["q"] },
   { pattern: /^anime\/[a-z0-9-]+$/, paramNames: [] },
   { pattern: /^episode\/[a-z0-9-]+$/, paramNames: ["skipMirrors"] },
+  { pattern: /^mirror\/[a-z0-9-]+\/\d+$/, paramNames: [] },
 ];
 
 // Block path traversal dan karakter mencurigakan
