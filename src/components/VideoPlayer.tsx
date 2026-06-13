@@ -88,56 +88,16 @@ interface VideoPlayerProps {
   nextEpisodeSlug?: string | null;
 }
 
-export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel, animeSlug, mirrors: initialMirrors, nextEpisodeSlug }: VideoPlayerProps) {
+export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel, animeSlug, mirrors, nextEpisodeSlug }: VideoPlayerProps) {
   const [lightsOut, setLightsOut] = useState(false);
   const [selectedMirror, setSelectedMirror] = useState("default");
-  const [mirrors, setMirrors] = useState<Mirror[]>(initialMirrors);
-  const [resolvingMirror, setResolvingMirror] = useState<string | null>(null);
   const { saveHistory } = useHistory();
 
-  // Key unik per mirror: gabungan quality + mirrorIndex + host
-  const mirrorKey = (m: Mirror) => `${m.quality}-${m.mirrorIndex}-${m.host ?? ""}`;
-
-  // Semua mirror — yang sudah resolve + yang belum
-  const allMirrors = mirrors;
-  // Hanya yang sudah punya iframeUrl (playable)
   const playableMirrors = mirrors.filter((mirror) => mirror.iframeUrl);
-  // activeMirror: cari berdasarkan key unik (quality+mirrorIndex+host)
-  const activeMirror = mirrors.find((mirror) => mirror.iframeUrl && mirrorKey(mirror) === selectedMirror);
+  const activeMirror = playableMirrors.find((mirror) => `${mirror.quality}-${mirror.mirrorIndex}` === selectedMirror);
   const rawEmbedUrl = activeMirror?.iframeUrl || embedUrl;
   const activeEmbedUrl = useMemo(() => isValidIframeUrl(rawEmbedUrl) ? rawEmbedUrl : null, [rawEmbedUrl]);
   const iframeValid = activeEmbedUrl !== null;
-
-
-  // Lazy resolve mirror yang belum di-resolve saat diklik
-  const handleMirrorClick = async (mirror: Mirror) => {
-    const key = mirrorKey(mirror);
-    // Kalau sudah resolved, langsung pilih
-    if (mirror.iframeUrl) {
-      setSelectedMirror(key);
-      return;
-    }
-    // Belum resolve — fetch on-demand
-    setResolvingMirror(key);
-    try {
-      const q = encodeURIComponent(mirror.quality ?? "");
-      const res = await fetch(`/api/anime-proxy/mirror/${episodeSlug}/${mirror.mirrorIndex}?q=${q}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json() as { data: Mirror };
-      const resolved = json.data;
-      // Update mirror yang match quality + mirrorIndex + host
-      setMirrors((prev) =>
-        prev.map((m) =>
-          mirrorKey(m) === key ? { ...m, ...resolved } : m
-        )
-      );
-      setSelectedMirror(key);
-    } catch {
-      setSelectedMirror(key);
-    } finally {
-      setResolvingMirror(null);
-    }
-  };
 
   useEffect(() => {
     saveHistory({ animeSlug, episodeSlug, episodeLabel, title });
@@ -202,7 +162,7 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
              </button>
           </div>
         </div>
-        {allMirrors.length > 0 && (
+        {playableMirrors.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedMirror("default")}
@@ -210,24 +170,19 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
             >
               Default
             </button>
-            {allMirrors.map((mirror) => {
-              const key = mirrorKey(mirror);
-              const isResolving = resolvingMirror === key;
-              const isUnresolved = !mirror.iframeUrl;
+            {playableMirrors.map((mirror) => {
+              const key = `${mirror.quality}-${mirror.mirrorIndex}`;
               return (
                 <button
                   key={key}
-                  onClick={() => handleMirrorClick(mirror)}
-                  disabled={isResolving}
+                  onClick={() => setSelectedMirror(key)}
                   className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${
                     selectedMirror === key
                       ? "border-indigo-400 bg-indigo-600 text-white"
-                      : isUnresolved
-                      ? "border-white/5 bg-zinc-900/40 text-zinc-600 hover:text-zinc-300 hover:border-white/10"
                       : "border-white/10 bg-zinc-900/70 text-zinc-400 hover:text-white"
                   }`}
                 >
-                  {isResolving ? "..." : `${mirror.quality}${mirror.host ? ` - ${mirror.host}` : ""}`}
+                  {mirror.quality}{mirror.host ? ` - ${mirror.host}` : ""}
                 </button>
               );
             })}
