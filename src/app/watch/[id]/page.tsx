@@ -49,7 +49,9 @@ export default async function WatchPage({
     // embedUrl + mirrors di-fetch client-side oleh AnimeEpisodeLoader
     const ep = await getEpisode(id, true); // skipMirrors=true: lebih cepat
     episode = ep;
-    anime = await getAnime(ep.animeSlug);
+    if (ep.animeSlug) {
+      anime = await getAnime(ep.animeSlug);
+    }
   } catch (error) {
     console.error("Failed to load episode metadata", error);
   }
