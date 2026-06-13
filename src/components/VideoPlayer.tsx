@@ -99,7 +99,8 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
   const allMirrors = mirrors;
   // Hanya yang sudah punya iframeUrl (playable)
   const playableMirrors = mirrors.filter((mirror) => mirror.iframeUrl);
-  const activeMirror = playableMirrors.find((mirror) => `${mirror.quality}-${mirror.mirrorIndex}` === selectedMirror);
+  // activeMirror: cari berdasarkan quality+mirrorIndex pada mirror yang sudah resolved
+  const activeMirror = mirrors.find((mirror) => mirror.iframeUrl && `${mirror.quality}-${mirror.mirrorIndex}` === selectedMirror);
   const rawEmbedUrl = activeMirror?.iframeUrl || embedUrl;
   const activeEmbedUrl = useMemo(() => isValidIframeUrl(rawEmbedUrl) ? rawEmbedUrl : null, [rawEmbedUrl]);
   const iframeValid = activeEmbedUrl !== null;
@@ -120,9 +121,12 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json() as { data: Mirror };
       const resolved = json.data;
+      // Identifikasi mirror unik dengan quality + mirrorIndex (bukan mirrorIndex saja)
       setMirrors((prev) =>
         prev.map((m) =>
-          m.mirrorIndex === mirror.mirrorIndex ? { ...m, ...resolved } : m
+          m.mirrorIndex === mirror.mirrorIndex && m.quality === mirror.quality
+            ? { ...m, ...resolved }
+            : m
         )
       );
       setSelectedMirror(key);
