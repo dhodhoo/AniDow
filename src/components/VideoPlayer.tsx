@@ -6,6 +6,31 @@ import { useHistory } from "@/hooks/useHistory";
 import Link from "next/link";
 import { Mirror } from "@/types/anime-api";
 
+// Host yang menggunakan iklan redirect saat klik — tidak bisa pakai sandbox
+const AD_REDIRECT_HOSTS = new Set([
+  "vidhide.com",
+  "odvidhide.com",
+  "vidhidepro.com",
+  "vidhidevip.com",
+]);
+
+// Host yang sering ada iklan (tampilkan badge warning)
+const ADS_HOSTS = new Set([
+  "vidhide",
+  "vidhidepro",
+  "vidhidevip",
+]);
+
+// Cek apakah URL embed berasal dari host yang tidak support sandbox
+function isAdRedirectHost(url: string): boolean {
+  try {
+    const hostname = new URL(url).hostname.replace(/^www\./, "");
+    return AD_REDIRECT_HOSTS.has(hostname);
+  } catch {
+    return false;
+  }
+}
+
 // Domain mirror video yang dikenal (allowlist untuk iframe src)
 const ALLOWED_IFRAME_HOSTS = new Set([
   "otakudesu.blog",
@@ -124,6 +149,11 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
                className="w-full h-full border-none z-0 relative"
                allowFullScreen
                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+               // Sandbox hanya untuk host yang tidak pakai iklan redirect
+               // Vidhide & sejenisnya tidak support sandbox (player tidak mau play)
+               {...(!isAdRedirectHost(activeEmbedUrl!) && {
+                 sandbox: "allow-scripts allow-same-origin allow-presentation allow-popups allow-forms"
+               })}
                title={title}
             />
           ) : (
@@ -172,6 +202,7 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
             </button>
             {playableMirrors.map((mirror) => {
               const key = `${mirror.quality}-${mirror.mirrorIndex}`;
+              const hasAds = mirror.host && ADS_HOSTS.has(mirror.host.toLowerCase());
               return (
                 <button
                   key={key}
@@ -183,6 +214,7 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
                   }`}
                 >
                   {mirror.quality}{mirror.host ? ` - ${mirror.host}` : ""}
+                  {hasAds && <span className="ml-1 text-amber-400 opacity-70">⚠️</span>}
                 </button>
               );
             })}
