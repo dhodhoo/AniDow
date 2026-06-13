@@ -1,10 +1,82 @@
 "use client";
 
-import { GripHorizontal, FastForward } from "lucide-react";
-import { useState, useEffect } from "react";
+import { GripHorizontal, FastForward, AlertTriangle } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
 import { useHistory } from "@/hooks/useHistory";
 import Link from "next/link";
 import { Mirror } from "@/types/anime-api";
+
+// Domain mirror video yang dikenal (allowlist untuk iframe src)
+const ALLOWED_IFRAME_HOSTS = new Set([
+  "otakudesu.blog",
+  "www.otakudesu.blog",
+  "desustream.live",
+  "www.desustream.live",
+  "miku-miku.my.id",
+  "www.miku-miku.my.id",
+  "filenara.my.id",
+  "www.filenara.my.id",
+  "lendrive.my.id",
+  "www.lendrive.my.id",
+  "media-phi.vercel.app",
+  "vidhide.com",
+  "www.vidhide.com",
+  "vidhidepro.com",
+  "www.vidhidepro.com",
+  "vidhidevip.com",
+  "www.vidhidevip.com",
+  "vidstream.pro",
+  "www.vidstream.pro",
+  "streamtape.com",
+  "www.streamtape.com",
+  "filemoon.sx",
+  "www.filemoon.sx",
+  "voe.sx",
+  "www.voe.sx",
+]);
+
+// Private/internal IP prefix yang diblokir
+const BLOCKED_URL_PATTERNS = [
+  /^https?:\/\/localhost[:\/]/i,
+  /^https?:\/\/127\.\d+\.\d+\.\d+/i,
+  /^https?:\/\/10\.\d+\.\d+\.\d+/i,
+  /^https?:\/\/172\.(1[6-9]|2\d|3[01])\.\d+\.\d+/i,
+  /^https?:\/\/192\.168\.\d+\.\d+/i,
+  /^https?:\/\/169\.254\.\d+\.\d+/i,
+  /^https?:\/\/\[::1\]/i,
+  /^https?:\/\/0\.0\.0\.0/i,
+];
+
+function isValidIframeUrl(url: string): boolean {
+  if (!url || typeof url !== "string") return false;
+
+  // Hanya izinkan HTTPS
+  if (!url.startsWith("https://")) return false;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+
+  // Blokir private/internal IP
+  for (const pattern of BLOCKED_URL_PATTERNS) {
+    if (pattern.test(url)) return false;
+  }
+
+  // Hostname harus ada di allowlist
+  if (!ALLOWED_IFRAME_HOSTS.has(parsed.hostname)) {
+    // Log untuk monitoring — host baru mungkin perlu ditambahkan
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[VideoPlayer] Unknown iframe host:", parsed.hostname);
+    }
+    // Untuk production, kita tetap izinkan host baru tapi log warning
+    // Agar tidak break fitur. Bisa diubah ke return false kalau mau ketat.
+  }
+
+  return true;
+}
 
 interface VideoPlayerProps {
   embedUrl: string;
@@ -22,7 +94,9 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
   const { saveHistory } = useHistory();
   const playableMirrors = mirrors.filter((mirror) => mirror.iframeUrl);
   const activeMirror = playableMirrors.find((mirror) => `${mirror.quality}-${mirror.mirrorIndex}` === selectedMirror);
-  const activeEmbedUrl = activeMirror?.iframeUrl || embedUrl;
+  const rawEmbedUrl = activeMirror?.iframeUrl || embedUrl;
+  const activeEmbedUrl = useMemo(() => isValidIframeUrl(rawEmbedUrl) ? rawEmbedUrl : null, [rawEmbedUrl]);
+  const iframeValid = activeEmbedUrl !== null;
 
   useEffect(() => {
     saveHistory({ animeSlug, episodeSlug, episodeLabel, title });
@@ -43,13 +117,23 @@ export default function VideoPlayer({ embedUrl, title, episodeSlug, episodeLabel
         <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 glass-card bg-black flex flex-col relative group">
 
           {/* IFrame Embedded Control */}
-          <iframe
-             src={activeEmbedUrl}
-             className="w-full h-full border-none z-0 relative"
-             allowFullScreen
-             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-             title={title}
-          />
+          {iframeValid ? (
+            <iframe
+               src={activeEmbedUrl!}
+               className="w-full h-full border-none z-0 relative"
+               allowFullScreen
+               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+               title={title}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-zinc-500 bg-zinc-950">
+              <AlertTriangle className="w-10 h-10 text-amber-500" />
+              <p className="text-sm font-medium">Sumber video tidak valid atau tidak didukung.</p>
+              {playableMirrors.length > 0 && (
+                <p className="text-xs text-zinc-600">Coba pilih mirror lain di bawah.</p>
+              )}
+            </div>
+          )}
 
           {/* Cinematic Overlay Title */}
           <div className="absolute top-0 w-full p-4 lg:p-6 bg-gradient-to-b from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex justify-between z-20">

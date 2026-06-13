@@ -8,8 +8,8 @@ import {
   getMovieDetails,
   getMovieFiles,
   getSeriesEpisodes,
-  getSeriesFiles,
 } from "@/lib/movie-api";
+import EpisodePlayerLoader from "@/components/EpisodePlayerLoader";
 
 const MoviePlayer = dynamicImport(
   () => import("@/components/MoviePlayer"),
@@ -21,8 +21,8 @@ import type {
   MovieSeriesEpisodesResponse,
 } from "@/types/movie-api";
 
-// stream_url kadaluarsa 6 jam — jangan pernah cache halaman ini
-export const dynamic = "force-dynamic";
+// Details + episodes di-cache, hanya stream URL yang force-dynamic (fetched client-side)
+export const revalidate = 3600;
 
 interface WatchSearchParams {
   id?: string;
@@ -80,13 +80,10 @@ export default async function MovieWatchPage({
 
   try {
     if (isTv) {
-      const s = season ?? 1;
-      const e = episode ?? 1;
-      [files, seriesData] = await Promise.all([
-        getSeriesFiles(subjectId, detailPath, s, e),
-        getSeriesEpisodes(detailPath).catch(() => null),
-      ]);
+      // Series: hanya fetch episodes (di-cache 1 jam). Files di-fetch client-side oleh EpisodePlayerLoader.
+      seriesData = await getSeriesEpisodes(detailPath).catch(() => null);
     } else {
+      // Film biasa: fetch files di server (tidak ada penggantian episode)
       files = await getMovieFiles(subjectId, detailPath);
     }
   } catch (error) {
@@ -129,7 +126,20 @@ export default async function MovieWatchPage({
         </h1>
       </div>
 
-      {files ? (
+      {isTv ? (
+        // TV Series: files di-fetch client-side agar navigasi episode instan
+        <EpisodePlayerLoader
+          subjectId={subjectId}
+          detailPath={detailPath}
+          season={season ?? 1}
+          episode={episode ?? 1}
+          title={details.title}
+          cover={details.cover ?? ""}
+          subjectType={details.subjectType}
+          nextEpisodeHref={nextEpisodeHref}
+        />
+      ) : files ? (
+        // Film biasa: files sudah di-fetch server-side
         <MoviePlayer
           initialFiles={absolutizeFiles(files)}
           title={details.title}
@@ -137,8 +147,8 @@ export default async function MovieWatchPage({
           subjectId={subjectId}
           detailPath={detailPath}
           subjectType={details.subjectType}
-          season={isTv ? season ?? 1 : null}
-          episode={isTv ? episode ?? 1 : null}
+          season={null}
+          episode={null}
           nextEpisodeHref={nextEpisodeHref}
         />
       ) : (
@@ -161,7 +171,6 @@ export default async function MovieWatchPage({
                       <Link
                         key={ep}
                         href={`/movies/${detailPath}/watch?id=${subjectId}&season=${s.season}&episode=${ep}`}
-                        prefetch={false}
                         className={`flex items-center justify-center rounded-lg border py-2 text-xs font-bold transition-colors ${
                           isActive
                             ? "border-amber-400/50 bg-amber-500/20 text-amber-300"

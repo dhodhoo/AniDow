@@ -32,7 +32,7 @@ export default function ContinueWatchingSection() {
                 key={`${entry.subjectId}-${entry.season}-${entry.episode}`}
                 className="relative w-[65%] shrink-0 snap-start sm:w-[42%] md:w-[30%] lg:w-[24%]"
               >
-                <Link href={watchHref} prefetch={false}>
+                <Link href={watchHref}>
                   <div className="glass-card group relative overflow-hidden rounded-2xl border border-white/5 transition-all duration-300 hover:border-amber-400/40">
                     <div className="relative aspect-video w-full bg-zinc-900">
                       {entry.cover && (

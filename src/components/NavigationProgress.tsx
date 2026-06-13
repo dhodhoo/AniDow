@@ -1,18 +1,17 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+// Hanya pakai usePathname (bukan useSearchParams) agar komponen tidak di-suspend
+// dan langsung mount tanpa perlu menunggu search params.
 export default function NavigationProgress() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Defer state update to avoid sync setState in effect
-    Promise.resolve().then(() => setLoading(true));
+    setLoading(true);
 
-    // Auto-hide progress after page settles
     const hideTimer = setTimeout(() => {
       setLoading(false);
     }, 800);
@@ -21,7 +20,7 @@ export default function NavigationProgress() {
       clearTimeout(hideTimer);
       setLoading(false);
     };
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   return (
     <div

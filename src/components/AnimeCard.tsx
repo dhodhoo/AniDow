@@ -33,7 +33,7 @@ export default function AnimeCard({ anime, index, priority = false }: AnimeCardP
   const statusLabel = anime.status ?? null;
 
   return (
-    <Link href={`/anime/${anime.slug}`} prefetch={false}>
+    <Link href={`/anime/${anime.slug}`}>
       <div
         className="glass-card rounded-2xl overflow-hidden flex flex-col h-full group cursor-pointer relative border border-white/5 hover:border-indigo-400/40 transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.02] animate-fade-in opacity-0"
         style={{

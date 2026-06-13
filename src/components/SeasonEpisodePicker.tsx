@@ -71,7 +71,6 @@ export default function SeasonEpisodePicker({ detailPath, subjectId, seasons }: 
           <Link
             key={episode}
             href={`/movies/${detailPath}/watch?id=${subjectId}&season=${current.season}&episode=${episode}`}
-            prefetch={false}
             className="glass-card group flex items-center justify-center gap-1.5 rounded-xl border border-white/5 py-3 text-sm font-bold text-zinc-200 transition-colors hover:border-amber-400/40 hover:bg-amber-500/10 hover:text-amber-300"
           >
             <Play className="hidden h-3 w-3 fill-current sm:inline" />

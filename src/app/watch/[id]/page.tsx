@@ -5,7 +5,10 @@ import type { AnimeResponse, DownloadGroup, EpisodeResponse } from "@/types/anim
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
-const VideoPlayer = dynamic(() => import("@/components/VideoPlayer"));
+// Cache halaman watch 10 menit — episode data relatif stabil, mirror URL sesekali berubah
+export const revalidate = 600;
+
+import AnimeEpisodeLoader from "@/components/AnimeEpisodeLoader";
 
 const EpisodeList = dynamic(() => import("@/components/EpisodeList"));
 
@@ -42,8 +45,11 @@ export default async function WatchPage({
   let anime: AnimeResponse | null = null;
 
   try {
-    episode = await getEpisode(id);
-    anime = await getAnime(episode.animeSlug);
+    // Hanya fetch metadata anime (judul, skor, synopsis, dll)
+    // embedUrl + mirrors di-fetch client-side oleh AnimeEpisodeLoader
+    const ep = await getEpisode(id, true); // skipMirrors=true: lebih cepat
+    episode = ep;
+    anime = await getAnime(ep.animeSlug);
   } catch (error) {
     console.error("Failed to load episode metadata", error);
   }
@@ -65,22 +71,14 @@ export default async function WatchPage({
   return (
     <div className="flex flex-col lg:flex-row gap-5 lg:gap-6 w-full pb-24 lg:pb-10 max-w-[1600px] mx-auto">
       <div className="flex-1 flex flex-col gap-6">
-        {embedUrl ? (
-          <VideoPlayer
-            key={episode.slug}
-            embedUrl={embedUrl}
-            title={anime?.info.judul || episode.title}
-            episodeSlug={episode.slug}
-            episodeLabel={episodeLabel}
-            animeSlug={episode.animeSlug}
-            mirrors={episode.mirrors}
-            nextEpisodeSlug={nextEpisodeSlug}
-          />
-        ) : (
-          <div className="glass-card flex aspect-video items-center justify-center rounded-2xl border border-white/10 text-zinc-500">
-            Streaming mirror tidak tersedia untuk episode ini.
-          </div>
-        )}
+        {/* embedUrl + mirrors di-fetch client-side agar navigasi episode instan */}
+        <AnimeEpisodeLoader
+          episodeSlug={episode.slug}
+          animeSlug={episode.animeSlug}
+          episodeLabel={episodeLabel}
+          animeTitle={anime?.info.judul || episode.title}
+          nextEpisodeSlug={nextEpisodeSlug}
+        />
 
         <div className="glass-card p-5 md:p-8 rounded-2xl flex flex-col gap-4 md:gap-5 border border-white/5 mt-1 md:mt-2">
           <div className="flex flex-wrap gap-2">

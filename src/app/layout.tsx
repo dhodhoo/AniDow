@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark h-full antialiased">
-      <body className={`${inter.className} min-h-screen flex flex-col bg-[#050505] text-zinc-400 selection:bg-indigo-500/30 selection:text-indigo-200`}>
+      <body suppressHydrationWarning className={`${inter.className} min-h-screen flex flex-col bg-[#050505] text-zinc-400 selection:bg-indigo-500/30 selection:text-indigo-200`}>
         <Suspense fallback={null}>
           <NavigationProgress />
         </Suspense>

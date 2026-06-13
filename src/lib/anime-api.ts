@@ -30,6 +30,7 @@ export class AnimeApiError extends Error {
 interface ApiOptions {
   params?: Record<string, string | number | boolean | null | undefined>;
   revalidate?: number;
+  headers?: HeadersInit;
 }
 
 function getBaseUrl() {
@@ -69,6 +70,10 @@ export async function animeApi<T>(path: string, options: ApiOptions = {}): Promi
   const apiKey = getApiKey();
   if (apiKey) {
     headers["X-API-Key"] = apiKey;
+  }
+  // Merge extra headers (mis. X-Real-IP dari proxy)
+  if (options.headers) {
+    Object.assign(headers, options.headers);
   }
 
   const response = await fetch(url, {

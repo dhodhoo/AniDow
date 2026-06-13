@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useContinueWatching } from "@/hooks/useContinueWatching";
-import { formatFileSize } from "@/lib/movie-api";
+import { formatFileSize, getPublicMediaBase } from "@/lib/movie-api";
 import type {
   MovieDownloadEntry,
   MovieFilesResponse,
@@ -61,13 +61,41 @@ function countReplacementChars(text: string): number {
   return count;
 }
 
+// Batas ukuran subtitle (cegah memory abuse & ReDoS pada konten besar)
+const MAX_SUBTITLE_BYTES = 2 * 1024 * 1024; // 2 MB
+
+// Validasi subtitle URL: hanya izinkan dari base media publik (MovieBox API)
+// atau path relatif same-origin. Cegah SSRF-like fetch ke domain arbitrary.
+function isAllowedSubtitleUrl(url: string): boolean {
+  const base = getPublicMediaBase();
+  // Path relatif (proxy same-origin) selalu boleh
+  if (url.startsWith("/")) return true;
+  if (base && url.startsWith(base)) return true;
+  // Izinkan same-origin absolut
+  if (typeof window !== "undefined" && url.startsWith(window.location.origin)) return true;
+  return false;
+}
+
 // Konversi SRT ke WebVTT (browser hanya terima VTT di <track>)
 // Deteksi encoding upstream: UTF-8 → Windows-1252 → ISO-8859-1 → GBK
 async function srtToVttBlobUrl(srtUrl: string): Promise<string> {
+  if (!isAllowedSubtitleUrl(srtUrl)) {
+    throw new Error("Subtitle URL tidak diizinkan");
+  }
+
   const res = await fetch(srtUrl);
   if (!res.ok) throw new Error(`Subtitle HTTP ${res.status}`);
 
+  // Batasi ukuran sebelum proses (cegah ReDoS/memory abuse)
+  const contentLength = res.headers.get("content-length");
+  if (contentLength && parseInt(contentLength, 10) > MAX_SUBTITLE_BYTES) {
+    throw new Error("Subtitle terlalu besar");
+  }
+
   const buffer = await res.arrayBuffer();
+  if (buffer.byteLength > MAX_SUBTITLE_BYTES) {
+    throw new Error("Subtitle terlalu besar");
+  }
 
   // Cek Content-Type untuk petunjuk charset
   let charset = "utf-8";
@@ -122,6 +150,7 @@ export default function MoviePlayer({
   const resumeAppliedRef = useRef(false);
   const lastSaveRef = useRef(0);
   const refreshingRef = useRef(false);
+  const lastErrorRef = useRef(0);  // anti-infinite-loop: debounce error-triggered refresh
 
   const [files, setFiles] = useState(initialFiles);
   const [activeResolution, setActiveResolution] = useState(initialFiles.downloads[0]?.resolution ?? 0);
@@ -293,9 +322,13 @@ export default function MoviePlayer({
   }, [saveEntry, subjectId, detailPath, title, cover, subjectType, season, episode]);
 
   // Error video — kemungkinan link expired (403) → re-fetch
+  // Debounce 5 detik untuk mencegah infinite loop: onError → refresh → load → error → ...
   const handleError = useCallback(() => {
     const video = videoRef.current;
     if (!video?.src) return;
+    const now = Date.now();
+    if (now - lastErrorRef.current < 5_000) return;
+    lastErrorRef.current = now;
     refreshFiles();
   }, [refreshFiles]);
 
