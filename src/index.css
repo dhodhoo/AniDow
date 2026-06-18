@@ -1,0 +1,153 @@
+html {
+  background-color: #141414;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #141414;
+  color: #ffffff;
+  font-family: 'Arial', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  /* Reserve scrollbar space so fixed navbar doesn't shift when scrollbar appears/disappears */
+  scrollbar-gutter: stable;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+/* ---- Hover animations ---- */
+
+/* Card thumbnail scale */
+.card-thumb {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+.card-thumb:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  z-index: 2;
+}
+
+/* CTA buttons */
+.btn-primary {
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-ghost {
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+.btn-ghost:hover {
+  background-color: rgba(255,255,255,0.15) !important;
+}
+.btn-ghost:active {
+  transform: scale(0.98);
+}
+
+/* Nav links */
+.nav-link {
+  transition: color 0.15s ease;
+}
+.nav-link:hover {
+  color: #FFFFFF !important;
+}
+
+/* Genre tile */
+.genre-tile {
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.genre-tile:hover {
+  transform: scale(1.03);
+  filter: brightness(1.15);
+}
+
+/* Episode row */
+.ep-row {
+  transition: background-color 0.15s ease;
+}
+.ep-row:hover {
+  background-color: rgba(255,255,255,0.05) !important;
+}
+
+/* Server/mirror buttons */
+.server-btn {
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.server-btn:hover {
+  border-color: #FFFFFF !important;
+  color: #FFFFFF !important;
+}
+
+/* Sidebar episode rows */
+.sidebar-ep {
+  transition: background-color 0.15s ease;
+}
+.sidebar-ep:hover {
+  background-color: rgba(255,255,255,0.06) !important;
+}
+
+/* FAB feedback button */
+.fab-btn:hover {
+  transform: scale(1.12) !important;
+  box-shadow: 0 6px 24px rgba(124,58,237,0.6) !important;
+}
+.fab-btn:active {
+  transform: scale(0.95) !important;
+}
+
+/* ---- Custom scrollbar ---- */
+
+/* Webkit: Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1F1F1F;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb {
+  background: #7C3AED;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #A855F7;
+}
+::-webkit-scrollbar-corner {
+  background: #141414;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #7C3AED #1F1F1F;
+}
+
+/* ---- Responsive utilities ---- */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+}
