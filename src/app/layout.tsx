@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import NavigationProgress from "../components/NavigationProgress";
 import FeedbackModal from "../components/FeedbackModal";
 import { Suspense } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -38,6 +39,7 @@ export default function RootLayout({
         <footer className="w-full text-center py-8 text-zinc-600/80 text-xs font-medium border-t border-white/5 mt-auto bg-[#0a0a0a]/30">
            <p>project gabut by <a href="https://github.com/dhodhoo/AniDow" target="_blank" rel="noopener noreferrer" className="text-indigo-400/80 hover:text-indigo-400 transition-colors cursor-pointer">@dhodho</a></p>
         </footer>
+        <SpeedInsights />
       </body>
     </html>
   );
